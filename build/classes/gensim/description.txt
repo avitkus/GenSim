@@ -1,0 +1,1 @@
+GenSim is a program to simulate genetic transfer in animals following both Mendelian and non-Mendelian inheritance patterns. It is currently setup to only handle using chickens as the animal of interest. The program is capable of saving, opening, and printing animal lists as well as automatically counting an performing chi-squared analyses with a any number of degrees of freedom.
