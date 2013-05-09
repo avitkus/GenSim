@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package gensim;
 
 /**
@@ -21,4 +17,6 @@ public interface Animal {
     public boolean isMale();
 
     public boolean isAlive();
+    
+    public Animal[] getParents();
 }

@@ -10,6 +10,8 @@ import java.util.Arrays;
 import javax.swing.JFrame;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  *
@@ -18,7 +20,7 @@ import javax.swing.JLabel;
 public class CounterPopup extends JFrame {
 
     private ArrayList<Animal> animals;
-    private String[] keys = new String[6];
+    private String[] keys = new String[7];
 
     public void showCounterDialog(ArrayList<Animal> animals) {
         this.animals = animals;
@@ -26,10 +28,18 @@ public class CounterPopup extends JFrame {
         Arrays.fill(keys, "Any");
 
         buildDisplay();
+        
+        setLocationByPlatform(true);
         setSize(300, 250);
 
         setTitle("Counter");
         setVisible(true);
+        
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } 
+        catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) { }
+        
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
@@ -95,7 +105,18 @@ public class CounterPopup extends JFrame {
         });
         addComponent(legStyleCombo, 1, 1, 4);
 
-        addComponent(new JLabel("Egg Shell Color:"), 1, 0, 5);
+        addComponent(new JLabel("Breda Comb:"), 1, 0, 5);
+        final JComboBox<String> bredaCombCombo = new JComboBox<>(new String[]{"Any", "Comb", "Combless"});
+        bredaCombCombo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                keys[5] = bredaCombCombo.getItemAt(bredaCombCombo.getSelectedIndex());
+                count.setText("Total: " + count());
+            }
+        });
+        addComponent(bredaCombCombo, 1, 1, 5);
+        
+        addComponent(new JLabel("Egg Shell Color:"), 1, 0, 6);
         final JComboBox<String> eggShellColorCombo = new JComboBox<>(new String[]{"Any", "White", "Blue"});
         eggShellColorCombo.addActionListener(new ActionListener() {
             @Override
@@ -104,7 +125,7 @@ public class CounterPopup extends JFrame {
                 count.setText("Total: " + count());
             }
         });
-        addComponent(eggShellColorCombo, 1, 1, 5);
+        addComponent(eggShellColorCombo, 1, 1, 6);
     }
 
     private int count() {

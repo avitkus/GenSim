@@ -8,37 +8,46 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class Chicken implements Animal, java.io.Serializable {
 
-    private final int geneCount = 6;
+    private final int geneCount = 7;
     private Gene[] genes = new Gene[geneCount];
-    private String[] phenotype = new String[6];
+    private String[] phenotype = new String[7];
+    private Chicken[] parents = new Chicken[2];
 
     public Chicken(String[] genotype) {
         genes[0] = new BarredFeatherGene(genotype[0]);
         genes[1] = new FrizzleFeatherGene(genotype[1]);
-        genes[2] = new WhiteFeatherGene(genotype[2]);
-        genes[3] = new ColoredFeatherGene(genotype[3]);
+        genes[2] = new BlackFeatherGene(genotype[2]);
+        genes[3] = new ColumbianFeatherGene(genotype[3]);
         genes[4] = new CreeperLegGene(genotype[4]);
-        genes[5] = new ShellColorGene(genotype[5]);
+        genes[5] = new BredaCombGene(genotype[5]);
+        genes[6] = new ShellColorGene(genotype[6]);
 
         buildPhenotype();
+        
+        for(String str : genotype) {
+            System.out.print(str + " ");
+        }
+        System.out.println();
     }
 
     public static String[] getTitles() {
-        String[] titles = new String[6];
+        String[] titles = new String[7];
 
         titles[0] = "Sex";
         titles[1] = "Feather Style";
         titles[2] = "Feather Decoration";
         titles[3] = "Feather Color";
         titles[4] = "Leg Style";
-        titles[5] = "Egg Color";
+        titles[5] = "Breda Comb";
+        titles[6] = "Egg Color";
 
         return titles;
     }
 
     @Override
-    public Animal breed(Animal mate) {
-        if (mate instanceof Chicken) {
+    public Animal breed(Animal a) {
+        if (a instanceof Chicken) {
+            Chicken mate = (Chicken)a;
             if (isMale() == !mate.isMale()) {
                 String[] child = new String[geneCount];
                 do {
@@ -50,7 +59,10 @@ public class Chicken implements Animal, java.io.Serializable {
                     }
                 } while (child[4].equals("CC"));
 
-                return new Chicken(child);
+                Chicken chick = new Chicken(child);
+                chick.parents[0] = this;
+                chick.parents[1] = mate;
+                return chick;
             } else {
                 return null;
             }
@@ -109,19 +121,25 @@ public class Chicken implements Animal, java.io.Serializable {
         phenotype[0] = isMale() ? "Male" : "Female";
         phenotype[1] = genes[1].getPhenotype();
         phenotype[2] = genes[0].getPhenotype();
-        if (genes[2].getPhenotype().equalsIgnoreCase("White")) {
-            phenotype[3] = "White";
-        } else if (genes[3].getPhenotype().equalsIgnoreCase("White")) {
-            phenotype[3] = "White";
+        if (genes[2].getPhenotype().equalsIgnoreCase("Black")) {
+            phenotype[3] = "Black";
+        } else if (genes[3].getPhenotype().equalsIgnoreCase("Columbian")) {
+            phenotype[3] = "Columbian";
         } else {
-            phenotype[3] = "Colored";
+            phenotype[3] = "Wheaten";
         }
         phenotype[4] = genes[4].getPhenotype();
         phenotype[5] = genes[5].getPhenotype();
+        phenotype[6] = genes[6].getPhenotype();
     }
 
     @Override
     public boolean isAlive() {
         return (!genes[4].getPhenotype().equalsIgnoreCase("Dead"));
+    }
+
+    @Override
+    public Animal[] getParents() {
+        return parents;
     }
 }

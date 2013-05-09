@@ -19,8 +19,8 @@ import javax.swing.JRadioButton;
  */
 public class AddAnimalPopup extends JFrame {
 
-    private String[] genotype = new String[6];
-    private Integer[] geneSelections = new Integer[6];
+    private String[] genotype = new String[7];
+    private Integer[] geneSelections = new Integer[7];
     protected int selection = -1;
 
     public String[] showAddAnimalDialog() {
@@ -69,50 +69,55 @@ public class AddAnimalPopup extends JFrame {
         }
 
         if (geneSelections[1] == 1) {
-            genotype[2] = "ww";
+            genotype[2] = "ee";
             genotype[3] = Math.random() > .5 ? "CC" : "Cc";
+        } else if (geneSelections[1] == 2) {
+            genotype[2] = "ee";
+            genotype[3] = "cc";
         } else {
             Random rand = new Random();
 
-            switch (rand.nextInt(7)) {
+            switch (rand.nextInt(6)) {
                 case 0:
-                    genotype[2] = "WW";
+                    genotype[2] = "EE";
                     genotype[3] = "CC";
                     break;
                 case 1:
-                    genotype[2] = "WW";
+                    genotype[2] = "EE";
                     genotype[3] = "Cc";
                     break;
                 case 2:
-                    genotype[2] = "WW";
+                    genotype[2] = "EE";
                     genotype[3] = "cc";
                     break;
                 case 3:
-                    genotype[2] = "Ww";
+                    genotype[2] = "Ee";
                     genotype[3] = "CC";
                     break;
                 case 4:
-                    genotype[2] = "Ww";
+                    genotype[2] = "Ee";
                     genotype[3] = "Cc";
                     break;
                 case 5:
-                    genotype[2] = "Ww";
-                    genotype[3] = "cc";
-                    break;
-                case 6:
-                    genotype[2] = "ww";
+                    genotype[2] = "Ee";
                     genotype[3] = "cc";
                     break;
             }
         }
 
         genotype[4] = geneSelections[4] == 0 ? "cc" : "Cc";
-
-        if (geneSelections[5] == 1) {
+        
+        if (geneSelections[5] == 0) {
             genotype[5] = "B";
-            genotype[5] += Math.random() > .5 ? "B" : "b";
+            genotype[5] += Math.random() < .5 ? "B" : "b";
         } else {
             genotype[5] = "bb";
+        }
+        if (geneSelections[6] == 1) {
+            genotype[6] = "B";
+            genotype[6] += Math.random() > .5 ? "B" : "b";
+        } else {
+            genotype[6] = "bb";
         }
     }
 
@@ -155,25 +160,34 @@ public class AddAnimalPopup extends JFrame {
 
         addComponent(new JLabel("Feather Color:"), GridBagConstraints.BOTH, 6, 0, 2);
         ButtonGroup featherColorButtons = new ButtonGroup();
-        JRadioButton whiteFeatherButton = new JRadioButton("White");
-        whiteFeatherButton.addActionListener(new ActionListener() {
+        JRadioButton blackFeatherButton = new JRadioButton("Black");
+        blackFeatherButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 geneSelections[1] = 0;
             }
         });
-        JRadioButton colorFeatherButton = new JRadioButton("Colored");
-        colorFeatherButton.addActionListener(new ActionListener() {
+        JRadioButton columbianFeatherButton = new JRadioButton("Columbian");
+        columbianFeatherButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 geneSelections[1] = 1;
             }
         });
-        featherColorButtons.add(whiteFeatherButton);
-        featherColorButtons.add(colorFeatherButton);
+        JRadioButton wheatenFeatherButton = new JRadioButton("Wheaten");
+        wheatenFeatherButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                geneSelections[1] = 2;
+            }
+        });
+        featherColorButtons.add(blackFeatherButton);
+        featherColorButtons.add(columbianFeatherButton);
+        featherColorButtons.add(wheatenFeatherButton);
 
-        addComponent(whiteFeatherButton, 3, 0, 3);
-        addComponent(colorFeatherButton, 3, 4, 3);
+        addComponent(blackFeatherButton, 2, 0, 3);
+        addComponent(columbianFeatherButton, 2, 3, 3);
+        addComponent(wheatenFeatherButton, 2, 5, 3);
 
         addComponent(new JLabel("Feather Decorations:"), GridBagConstraints.BOTH, 6, 0, 4);
         ButtonGroup barredFeatherStyleButtons = new ButtonGroup();
@@ -250,27 +264,49 @@ public class AddAnimalPopup extends JFrame {
         addComponent(normalLegButton, 3, 0, 9);
         addComponent(creeperLegButton, 3, 4, 9);
 
-        addComponent(new JLabel("Egg Shell Color:"), GridBagConstraints.BOTH, 6, 0, 10);
+        addComponent(new JLabel("Breda Comb:"), GridBagConstraints.BOTH, 6, 0, 10);
+        ButtonGroup bredaCombButtons = new ButtonGroup();
+        JRadioButton combButton = new JRadioButton("Comb");
+        combButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                geneSelections[5] = 0;
+            }
+        });
+        JRadioButton comblessButton = new JRadioButton("Combless");
+        comblessButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                geneSelections[5] = 1;
+            }
+        });
+        bredaCombButtons.add(combButton);
+        bredaCombButtons.add(comblessButton);
+
+        addComponent(combButton, 3, 0, 11);
+        addComponent(comblessButton, 3, 4, 11);
+        
+        addComponent(new JLabel("Egg Shell Color:"), GridBagConstraints.BOTH, 6, 0, 12);
         ButtonGroup shellColorButtons = new ButtonGroup();
         JRadioButton blueShellButton = new JRadioButton("Blue");
         blueShellButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                geneSelections[5] = 0;
+                geneSelections[6] = 0;
             }
         });
         JRadioButton whiteShellButton = new JRadioButton("White");
         whiteShellButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                geneSelections[5] = 1;
+                geneSelections[6] = 1;
             }
         });
         shellColorButtons.add(blueShellButton);
         shellColorButtons.add(whiteShellButton);
 
-        addComponent(blueShellButton, 3, 0, 11);
-        addComponent(whiteShellButton, 3, 4, 11);
+        addComponent(blueShellButton, 3, 0, 13);
+        addComponent(whiteShellButton, 3, 4, 13);
 
 
         JButton addButton = new JButton("Add");
@@ -290,8 +326,8 @@ public class AddAnimalPopup extends JFrame {
         });
 
 
-        addComponent(addButton, 1, 1, 12);
-        addComponent(cancelButton, 1, 5, 12);
+        addComponent(addButton, 1, 1, 14);
+        addComponent(cancelButton, 1, 5, 14);
     }
 
     private void addComponent(Component component, int width, int x, int y) {

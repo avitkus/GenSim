@@ -1,7 +1,10 @@
 package gensim;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.print.PrinterException;
@@ -15,6 +18,10 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.imageio.spi.IIORegistry;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
@@ -30,9 +37,11 @@ import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.FontUIResource;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
@@ -70,6 +79,20 @@ public class GenSim extends JFrame implements Runnable {
         father = -1;
         animalCount = new AtomicInteger(0);
         
+        setIconImage(Toolkit.getDefaultToolkit().getImage("GenSim icon large.png"));
+        
+        /*IIORegistry.getDefaultInstance().registerApplicationClasspathSpis();
+        ImageIO.scanForPlugins();
+        try {
+            File image = new File("GenSim Logo.png");
+            if (image.exists()) {
+                Image icon = ImageIO.read(image);
+                setIconImage(icon);
+            }
+        } catch (IOException ex) {
+            System.out.println("You dun goofed");
+        }*/
+        
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
@@ -86,19 +109,26 @@ public class GenSim extends JFrame implements Runnable {
 
     @Override
     public void run() {
-        setSize(600, 600);
+        setSize(675, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationByPlatform(true);
+        
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } 
+        catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) { }
 
         makeMenuBar();
         makeToolBar();
-
+        
+        //setIconImage(null);
+        
         setupTable();
         showStatusBar();
         showToolBar();
 
         add(new JScrollPane(table), BorderLayout.CENTER);
-
+        
         setVisible(true);
     }
 
@@ -333,20 +363,26 @@ public class GenSim extends JFrame implements Runnable {
             @Override
             public void actionPerformed(ActionEvent e) {
                 boolean okay;
+                    int newSize = clutchSize;
                 do {
                     okay = true;
                     String buf = JOptionPane.showInputDialog(GenSim.this, "Enter the clutch size", clutchSize);
                     try {
-                        clutchSize = Integer.parseInt(buf);
+                        newSize = Integer.parseInt(buf);
+                        if (newSize < 1) {
+                            throw new NumberFormatException();
+                        }
                     } catch (NumberFormatException ex) {
                         int choice = JOptionPane.showConfirmDialog(GenSim.this, "Invalid clutch size", "Error", JOptionPane.OK_CANCEL_OPTION);
                         if (choice == JOptionPane.OK_OPTION) {
                             okay = false;
                         } else if (choice == JOptionPane.CANCEL_OPTION) {
+                            newSize = clutchSize;
                             okay = true;
                         }
                     }
                 } while (!okay);
+                clutchSize = newSize;
             }
         });
         setClutchSizeItem.setMnemonic('c');
@@ -395,6 +431,16 @@ public class GenSim extends JFrame implements Runnable {
             }
         });
         mateItem.setMnemonic('m');
+        
+        JMenuItem showParentsItem = new JMenuItem("Show Parents");
+        showParentsItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+            }
+            
+        });
 
         mbar.add(animalMenu);
         animalMenu.add(addAnimalItem);
@@ -403,19 +449,87 @@ public class GenSim extends JFrame implements Runnable {
         animalMenu.add(setClutchSizeItem);
         animalMenu.add(new JSeparator());
         animalMenu.add(mateItem);
+        
+        JMenu statsMenu = new JMenu("Statistics");
+        
+        statsMenu.setMnemonic('s');
+        
+        JMenuItem countItem = new JMenuItem("Count...");
+        countItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<Animal> toCount = new ArrayList<>();
+                int[] selected = table.getSelectedRows();
+                if (selected.length == 0) {
+                    toCount = animals;
+                } else {
+                    for(int row : selected) {
+                        toCount.add(animals.get(Integer.parseInt((String)tableModel.getValueAt(row, 0)) - 1));
+                    }
+                }
+                new CounterPopup().showCounterDialog(toCount);
+            }
+        });
+        countItem.setMnemonic('c');
+        
+        JMenuItem chiSquaredItem = new JMenuItem("Chi-squared...");
+        chiSquaredItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println(UIManager.getString("OptionPaneUI"));
+                System.out.println(UIManager.getString("Label.font"));
+                new ChiSquaredPopup().showTestWindow();
+            }
+        });
+        chiSquaredItem.setMnemonic('s');
+        
+        mbar.add(statsMenu);
+        statsMenu.add(countItem);
+        statsMenu.add(chiSquaredItem);
 
         JMenu optionsMenu = new JMenu("Options");
 
         optionsMenu.setMnemonic('o');
 
-        JMenuItem chiSquaredItem = new JMenuItem("Chi-squared...");
-        chiSquaredItem.addActionListener(new ActionListener() {
+        JMenu fontMenu = new JMenu("Font");
+        fontMenu.setMnemonic('f');
+        
+        JMenuItem smallFontItem = new JMenuItem("Small");
+        smallFontItem.addActionListener(new ActionListener() {
+
             @Override
             public void actionPerformed(ActionEvent e) {
-                new ChiSquaredPopup().showTestWindow();
+                changeGlobalFontSize(-1);
             }
+            
         });
-        chiSquaredItem.setMnemonic('c');
+        smallFontItem.setMnemonic('m');
+        
+        JMenuItem normalFontItem = new JMenuItem("Normal");
+        normalFontItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeGlobalFontSize(0);
+            }
+            
+        });
+        normalFontItem.setMnemonic('n');
+        
+        JMenuItem largeFontItem = new JMenuItem("Large");
+        largeFontItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeGlobalFontSize(2);
+            }
+            
+        });
+        largeFontItem.setMnemonic('l');
+        
+        fontMenu.add(smallFontItem);
+        fontMenu.add(normalFontItem);
+        fontMenu.add(largeFontItem);
 
         final JCheckBoxMenuItem toolbarItem = new JCheckBoxMenuItem("Toolbar", true);
         toolbarItem.addActionListener(new ActionListener() {
@@ -444,7 +558,7 @@ public class GenSim extends JFrame implements Runnable {
         statusBarItem.setMnemonic('s');
 
         mbar.add(optionsMenu);
-        optionsMenu.add(chiSquaredItem);
+        optionsMenu.add(fontMenu);
         optionsMenu.add(new JSeparator());
         optionsMenu.add(toolbarItem);
         optionsMenu.add(statusBarItem);
@@ -457,7 +571,7 @@ public class GenSim extends JFrame implements Runnable {
         aboutItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(GenSim.this, "GenSim v 1.0\n\nBy: Andrew Vitkus,\n       Teddy Wong\n\nLast Updated: 2/2013", "About GenSim", JOptionPane.PLAIN_MESSAGE);
+                JOptionPane.showMessageDialog(GenSim.this, "GenSim v 1.1a\n\nBy: Andrew Vitkus\n\nLast Updated: 3/2013", "About GenSim", JOptionPane.PLAIN_MESSAGE);
             }
         });
         aboutItem.setMnemonic('a');
@@ -522,7 +636,16 @@ public class GenSim extends JFrame implements Runnable {
         countButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new CounterPopup().showCounterDialog(animals);
+                ArrayList<Animal> toCount = new ArrayList<>();
+                int[] selected = table.getSelectedRows();
+                if (selected.length == 0) {
+                    toCount = animals;
+                } else {
+                    for(int row : selected) {
+                        toCount.add(animals.get(Integer.parseInt((String)tableModel.getValueAt(row, 0)) - 1));
+                    }
+                }
+                new CounterPopup().showCounterDialog(toCount);
             }
         });
         toolBar.add(countButton);
@@ -602,14 +725,12 @@ public class GenSim extends JFrame implements Runnable {
         FileNameExtensionFilter textFilter = new FileNameExtensionFilter("GenSim file", "gsm");
 
         fc.setFileFilter(textFilter);
+        
 
         int chosen = fc.showOpenDialog(GenSim.this);
 
         if (chosen == JFileChooser.APPROVE_OPTION) {
             currentFile = fc.getSelectedFile();
-            /*if(!currentFile.getName().endsWith(".gsm")) {
-             currentFile = new File(currentFile.toPath() + ".gsm");
-             }*/
         }
 
         return chosen;
@@ -627,9 +748,13 @@ public class GenSim extends JFrame implements Runnable {
 
         if (chosen == JFileChooser.APPROVE_OPTION) {
             currentFile = fc.getSelectedFile();
-            /*if(!currentFile.getName().endsWith(".gsm")) {
-             currentFile = new File(currentFile.toPath() + ".gsm");
-             }*/
+            try {
+                String fileName = currentFile.getCanonicalPath();
+                if(!fileName.endsWith(".gsm")) {
+                    currentFile = new File(fileName + ".gsm");
+                }
+            } catch (IOException ex) {
+            }
         }
 
         return chosen;
@@ -667,6 +792,30 @@ public class GenSim extends JFrame implements Runnable {
         } else {
             setTitle("GenSim*");
         }
+    }
+    
+    private void changeGlobalFontSize(int change) {
+        changeFontSize("Button.font", change);
+        changeFontSize("TextField.font", change);
+        changeFontSize("Label.font", change);
+        changeFontSize("Menu.font", change);
+        changeFontSize("MenuItem.font", change);
+        changeFontSize("CheckBoxMenuItem.font", change);
+        changeFontSize("ComboBox.font", change);
+        changeFontSize("OptionPane.font", change);
+        changeFontSize("RadioButton.font", change);
+        javax.swing.SwingUtilities.updateComponentTreeUI(this);
+    }
+    
+    private void changeFontSize(String key, int change) {
+        LookAndFeel sysDefault = null;
+        try {
+            sysDefault = (LookAndFeel) Class.forName(UIManager.getSystemLookAndFeelClassName()).newInstance();
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
+        }
+        Font defaultFont = sysDefault.getDefaults().getFont(key);
+        FontUIResource res = new FontUIResource(defaultFont.deriveFont(defaultFont.getSize2D() + change));
+        UIManager.put(key, res);
     }
 
     protected class StatusBar extends JPanel {

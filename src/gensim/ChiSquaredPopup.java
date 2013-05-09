@@ -19,7 +19,7 @@ public class ChiSquaredPopup extends JFrame {
     private int degreesOfFreedom = 0;
     private JTextField[] expected;
     private JTextField[] observed;
-
+    
     public void showTestWindow() {
         boolean cancel = false;
         do {
@@ -41,6 +41,7 @@ public class ChiSquaredPopup extends JFrame {
     }
 
     private void buildWindow() {
+        setLocationByPlatform(true);
         setLayout(new GridBagLayout());
 
         final JLabel chiSquaredValue = new JLabel("Chi-squared: ");
@@ -93,7 +94,9 @@ public class ChiSquaredPopup extends JFrame {
         double value = 0;
 
         for (int i = 0; i <= degreesOfFreedom; i++) {
-            value += (Math.pow(Integer.parseInt(observed[i].getText()) - Integer.parseInt(expected[i].getText()), 2) / Integer.parseInt(expected[i].getText()));
+            try {
+                value += (Math.pow(Integer.parseInt(observed[i].getText()) - Integer.parseInt(expected[i].getText()), 2) / Integer.parseInt(expected[i].getText()));
+            } catch(NumberFormatException ex) {}
         }
 
         return value;
