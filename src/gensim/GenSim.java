@@ -1,3 +1,20 @@
+/*
+ * This file is part of GenSim.
+ *
+ * GenSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * GenSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package gensim;
 
 import java.awt.BorderLayout;
@@ -47,7 +64,7 @@ import javax.swing.table.TableRowSorter;
 
 /**
  *
- * @author Andrew
+ * @author Andrew Vitkus
  */
 public class GenSim extends JFrame implements Runnable {
 
@@ -79,7 +96,7 @@ public class GenSim extends JFrame implements Runnable {
         father = -1;
         animalCount = new AtomicInteger(0);
         
-        setIconImage(Toolkit.getDefaultToolkit().getImage("GenSim icon large.png"));
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/GenSim icon large.png")));
         
         /*IIORegistry.getDefaultInstance().registerApplicationClasspathSpis();
         ImageIO.scanForPlugins();
@@ -92,11 +109,6 @@ public class GenSim extends JFrame implements Runnable {
         } catch (IOException ex) {
             System.out.println("You dun goofed");
         }*/
-        
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-        }
         
     }
 
@@ -115,8 +127,7 @@ public class GenSim extends JFrame implements Runnable {
         
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } 
-        catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) { }
+        } catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) { }
 
         makeMenuBar();
         makeToolBar();
@@ -432,6 +443,18 @@ public class GenSim extends JFrame implements Runnable {
         });
         mateItem.setMnemonic('m');
         
+        JMenuItem viewItem = new JMenuItem("View");
+        viewItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int[] selected = table.getSelectedRows();
+                if (selected.length > 0) {
+                    ChickenDisplay.showChickenDisplay((Chicken)animals.get(Integer.parseInt((String)table.getValueAt(selected[0], 0))-1));
+                }
+            }
+        });
+        viewItem.setMnemonic('v');
+        
         JMenuItem showParentsItem = new JMenuItem("Show Parents");
         showParentsItem.addActionListener(new ActionListener() {
 
@@ -449,6 +472,7 @@ public class GenSim extends JFrame implements Runnable {
         animalMenu.add(setClutchSizeItem);
         animalMenu.add(new JSeparator());
         animalMenu.add(mateItem);
+        animalMenu.add(viewItem);
         
         JMenu statsMenu = new JMenu("Statistics");
         
@@ -571,7 +595,12 @@ public class GenSim extends JFrame implements Runnable {
         aboutItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(GenSim.this, "GenSim v 1.1a\n\nBy: Andrew Vitkus\n\nLast Updated: 3/2013", "About GenSim", JOptionPane.PLAIN_MESSAGE);
+                JOptionPane.showMessageDialog(GenSim.this, "GenSim v 1.1rc1\n\n"
+                        + "Coded by: Andrew Vitkus\n"
+                        + "Logo art by: Andrew Vitkus\n"
+                        + "Chicken art by: Fred Hurteau\n\n"
+                        + "Last Updated: 5/2013"
+                        , "About GenSim", JOptionPane.PLAIN_MESSAGE);
             }
         });
         aboutItem.setMnemonic('a');
@@ -658,6 +687,19 @@ public class GenSim extends JFrame implements Runnable {
             }
         });
         toolBar.add(chiSquaredButton);
+        
+        JButton chickenViewButton = new JButton("View Chicken");
+        chickenViewButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int[] selected = table.getSelectedRows();
+                if (selected.length > 0) {
+                    ChickenDisplay.showChickenDisplay((Chicken)animals.get(Integer.parseInt((String)table.getValueAt(selected[0], 0))-1));
+                }
+            }
+        });
+        toolBar.add(chickenViewButton);
+
 
         toolBar.setFloatable(false);
         toolBar.setRollover(true);

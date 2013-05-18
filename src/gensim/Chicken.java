@@ -1,10 +1,27 @@
+/*
+ * This file is part of GenSim.
+ *
+ * GenSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * GenSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package gensim;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
  *
- * @author Andrew
+ * @author Andrew Vitkus
  */
 public class Chicken implements Animal, java.io.Serializable {
 
@@ -24,10 +41,10 @@ public class Chicken implements Animal, java.io.Serializable {
 
         buildPhenotype();
         
-        for(String str : genotype) {
+        /*for(String str : genotype) {
             System.out.print(str + " ");
         }
-        System.out.println();
+        System.out.println();*/
     }
 
     public static String[] getTitles() {
