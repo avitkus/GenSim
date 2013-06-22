@@ -595,12 +595,7 @@ public class GenSim extends JFrame implements Runnable {
         aboutItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(GenSim.this, "GenSim v 1.1rc1\n\n"
-                        + "Coded by: Andrew Vitkus\n"
-                        + "Logo art by: Andrew Vitkus\n"
-                        + "Chicken art by: Fred Hurteau\n\n"
-                        + "Last Updated: 5/2013"
-                        , "About GenSim", JOptionPane.PLAIN_MESSAGE);
+                javax.swing.SwingUtilities.invokeLater(new AboutWindow());
             }
         });
         aboutItem.setMnemonic('a');

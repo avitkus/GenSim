@@ -101,7 +101,7 @@ public class CounterPopup extends JFrame {
         addComponent(featherDecorationCombo, 1, 1, 2);
 
         addComponent(new JLabel("Feather Color:"), 1, 0, 3);
-        final JComboBox<String> featherColorCombo = new JComboBox<>(new String[]{"Any", "White", "Colored"});
+        final JComboBox<String> featherColorCombo = new JComboBox<>(new String[]{"Any", "Black", "Columbian", "Wheaten"});
         featherColorCombo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
