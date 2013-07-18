@@ -20,6 +20,7 @@ package gensim;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
@@ -36,7 +37,7 @@ import javax.swing.JRadioButton;
 public class AddAnimalPopup extends JFrame {
 
     private String[] genotype = new String[7];
-    private Integer[] geneSelections = new Integer[7];
+    private Integer[] geneSelections = {0, 0, 0, 0, 0, 0, 0};
     protected int selection = -1;
 
     public String[] showAddAnimalDialog() {
@@ -138,7 +139,7 @@ public class AddAnimalPopup extends JFrame {
     }
 
     private void setup() {
-        setSize(225, 375);
+        setSize(300, 375);
         setResizable(false);
         setTitle("Select traits");
         setLocationByPlatform(true);
@@ -146,6 +147,8 @@ public class AddAnimalPopup extends JFrame {
         buildWindow();
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setVisible(true);
+        
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/GenSim icon large.png")));
     }
 
     private void buildWindow() {
@@ -170,6 +173,7 @@ public class AddAnimalPopup extends JFrame {
         });
         genderButtons.add(maleButton);
         genderButtons.add(femaleButton);
+        genderButtons.setSelected(maleButton.getModel(), true);
 
         addComponent(maleButton, 3, 0, 1);
         addComponent(femaleButton, 3, 4, 1);
@@ -200,6 +204,7 @@ public class AddAnimalPopup extends JFrame {
         featherColorButtons.add(blackFeatherButton);
         featherColorButtons.add(columbianFeatherButton);
         featherColorButtons.add(wheatenFeatherButton);
+        featherColorButtons.setSelected(blackFeatherButton.getModel(), true);
 
         addComponent(blackFeatherButton, 2, 0, 3);
         addComponent(columbianFeatherButton, 2, 3, 3);
@@ -223,6 +228,7 @@ public class AddAnimalPopup extends JFrame {
         });
         barredFeatherStyleButtons.add(solidFeatherButton);
         barredFeatherStyleButtons.add(barredFeatherButton);
+        barredFeatherStyleButtons.setSelected(solidFeatherButton.getModel(), true);
 
         addComponent(solidFeatherButton, 3, 0, 5);
         addComponent(barredFeatherButton, 3, 4, 5);
@@ -253,6 +259,7 @@ public class AddAnimalPopup extends JFrame {
         featherStyleButtons.add(normalFeatherButton);
         featherStyleButtons.add(frizzleFeatherButton);
         featherStyleButtons.add(curlyFeatherButton);
+        featherStyleButtons.setSelected(normalFeatherButton.getModel(), true);
 
         addComponent(normalFeatherButton, 2, 0, 7);
         addComponent(frizzleFeatherButton, 2, 3, 7);
@@ -276,6 +283,7 @@ public class AddAnimalPopup extends JFrame {
         });
         legStypeButtons.add(normalLegButton);
         legStypeButtons.add(creeperLegButton);
+        legStypeButtons.setSelected(normalLegButton.getModel(), true);
 
         addComponent(normalLegButton, 3, 0, 9);
         addComponent(creeperLegButton, 3, 4, 9);
@@ -298,6 +306,7 @@ public class AddAnimalPopup extends JFrame {
         });
         bredaCombButtons.add(combButton);
         bredaCombButtons.add(comblessButton);
+        bredaCombButtons.setSelected(combButton.getModel(), true);
 
         addComponent(combButton, 3, 0, 11);
         addComponent(comblessButton, 3, 4, 11);
@@ -320,6 +329,7 @@ public class AddAnimalPopup extends JFrame {
         });
         shellColorButtons.add(blueShellButton);
         shellColorButtons.add(whiteShellButton);
+        shellColorButtons.setSelected(blueShellButton.getModel(), true);
 
         addComponent(blueShellButton, 3, 0, 13);
         addComponent(whiteShellButton, 3, 4, 13);

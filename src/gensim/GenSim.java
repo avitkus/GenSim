@@ -14,16 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package gensim;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.awt.event.WindowStateListener;
 import java.awt.print.PrinterException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,8 +36,6 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.imageio.ImageIO;
-import javax.imageio.spi.IIORegistry;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
@@ -93,21 +92,8 @@ public class GenSim extends JFrame implements Runnable {
         mother = -1;
         father = -1;
         animalCount = new AtomicInteger(0);
-        
+
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/GenSim icon large.png")));
-        
-        /*IIORegistry.getDefaultInstance().registerApplicationClasspathSpis();
-        ImageIO.scanForPlugins();
-        try {
-            File image = new File("GenSim Logo.png");
-            if (image.exists()) {
-                Image icon = ImageIO.read(image);
-                setIconImage(icon);
-            }
-        } catch (IOException ex) {
-            System.out.println("You dun goofed");
-        }*/
-        
     }
 
     /**
@@ -122,23 +108,67 @@ public class GenSim extends JFrame implements Runnable {
         setSize(675, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationByPlatform(true);
-        
+
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) { }
+        } catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+        }
 
         makeMenuBar();
         makeToolBar();
-        
-        //setIconImage(null);
-        
+
         setupTable();
         showStatusBar();
         showToolBar();
 
         add(new JScrollPane(table), BorderLayout.CENTER);
-        
+
         setVisible(true);
+        
+        addWindowListener(new WindowListener() {
+
+            @Override
+            public void windowOpened(WindowEvent e) { }
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (!isSaved) {
+                    int choice = JOptionPane.showConfirmDialog(GenSim.this, "Would you like to save before exiting?", "Warning!", JOptionPane.YES_NO_OPTION);
+                    if (choice == JOptionPane.YES_OPTION) {
+                        if (selectSaveFile() == JFileChooser.APPROVE_OPTION) {
+                            try {
+                                try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(currentFile))) {
+                                    oos.writeObject(animals);
+                                    oos.writeInt(father);
+                                    oos.writeInt(mother);
+                                }
+                                isSaved = true;
+                                fixTitle();
+                            } catch (FileNotFoundException ex) {
+                                System.out.printf("File %s not found\n", currentFile.getAbsolutePath());
+                            } catch (IOException ex) {
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) { }
+
+            @Override
+            public void windowIconified(WindowEvent e) { }
+
+            @Override
+            public void windowDeiconified(WindowEvent e) { }
+
+            @Override
+            public void windowActivated(WindowEvent e) { }
+
+            @Override
+            public void windowDeactivated(WindowEvent e) { }
+            
+        });
     }
 
     public void makeMenuBar() {
@@ -341,12 +371,26 @@ public class GenSim extends JFrame implements Runnable {
         });
         addAnimalItem.setMnemonic('a');
 
+        JMenuItem removeAnimalItem = new JMenuItem("Remove animal(s)");
+        removeAnimalItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int[] selected = table.getSelectedRows();
+                if (selected.length > 0) {
+                    for (int i = selected.length - 1; i >= 0; i--) {
+                        removeAnimal(selected[i]);
+                    }
+                }
+            }
+        });
+        addAnimalItem.setMnemonic('r');
+
         JMenuItem setParentItem = new JMenuItem("Set as parent");
         setParentItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int sel = table.getSelectedRow();
-                if (sel != -1  && sel < animalCount.get()) {
+                if (sel != -1 && sel < animalCount.get()) {
                     sel = Integer.parseInt((String) table.getValueAt(sel, 0)) - 1;
                     isSaved = false;
                     fixTitle();
@@ -372,7 +416,7 @@ public class GenSim extends JFrame implements Runnable {
             @Override
             public void actionPerformed(ActionEvent e) {
                 boolean okay;
-                    int newSize = clutchSize;
+                int newSize = clutchSize;
                 do {
                     okay = true;
                     String buf = JOptionPane.showInputDialog(GenSim.this, "Enter the clutch size", clutchSize);
@@ -407,11 +451,11 @@ public class GenSim extends JFrame implements Runnable {
                 } else if (threads > cores) {
                     threads = cores;
                 }
-                
+
                 int initial = animalCount.get();
                 int size = Math.max(clutchSize / threads, 500);
-                
-                for(int start = 0; start < clutchSize; start += size) {
+
+                for (int start = 0; start < clutchSize; start += size) {
                     final int end = Math.min(clutchSize, start + size);
                     new Thread() {
                         @Override
@@ -424,30 +468,30 @@ public class GenSim extends JFrame implements Runnable {
                         }
                     }.start();
                 }
-                
-                while(animalCount.get() - initial < clutchSize) {
+
+                while (animalCount.get() - initial < clutchSize) {
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException ex) {
                     }
                 }
-                
+
                 /*for (int i = 0; i < clutchSize; i++) {
-                    if (mother != -1 && father != -1) {
-                        addAnimal(animals.get(mother).breed(animals.get(father)));
-                    }
-                }*/
+                 if (mother != -1 && father != -1) {
+                 addAnimal(animals.get(mother).breed(animals.get(father)));
+                 }
+                 }*/
             }
         });
         mateItem.setMnemonic('m');
-        
+
         JMenuItem viewItem = new JMenuItem("View");
         viewItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int[] selected = table.getSelectedRows();
                 if (selected.length > 0) {
-                    ChickenDisplay.showChickenDisplay((Chicken)animals.get(Integer.parseInt((String)table.getValueAt(selected[0], 0))-1));
+                    ChickenDisplay.showChickenDisplay((Chicken) animals.get(Integer.parseInt((String) table.getValueAt(selected[0], 0)) - 1));
                 }
             }
         });
@@ -455,27 +499,30 @@ public class GenSim extends JFrame implements Runnable {
         
         JMenuItem showParentsItem = new JMenuItem("Show Parents");
         showParentsItem.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent e) {
-                
+                int selected = table.getSelectedRow();
+                selected = Integer.parseInt((String) table.getValueAt(selected, 0)) - 1;
+                new ParentDisplayWindow().showParents((Chicken)animals.get(selected));
             }
-            
         });
+        showParentsItem.setMnemonic('p');
 
         mbar.add(animalMenu);
         animalMenu.add(addAnimalItem);
+        animalMenu.add(removeAnimalItem);
         animalMenu.add(new JSeparator());
         animalMenu.add(setParentItem);
         animalMenu.add(setClutchSizeItem);
         animalMenu.add(new JSeparator());
         animalMenu.add(mateItem);
         animalMenu.add(viewItem);
-        
+        animalMenu.add(showParentsItem);
+
         JMenu statsMenu = new JMenu("Statistics");
-        
+
         statsMenu.setMnemonic('s');
-        
+
         JMenuItem countItem = new JMenuItem("Count...");
         countItem.addActionListener(new ActionListener() {
             @Override
@@ -485,15 +532,15 @@ public class GenSim extends JFrame implements Runnable {
                 if (selected.length == 0) {
                     toCount = animals;
                 } else {
-                    for(int row : selected) {
-                        toCount.add(animals.get(Integer.parseInt((String)tableModel.getValueAt(row, 0)) - 1));
+                    for (int row : selected) {
+                        toCount.add(animals.get(Integer.parseInt((String) tableModel.getValueAt(row, 0)) - 1));
                     }
                 }
                 new CounterPopup().showCounterDialog(toCount);
             }
         });
         countItem.setMnemonic('c');
-        
+
         JMenuItem chiSquaredItem = new JMenuItem("Chi-squared...");
         chiSquaredItem.addActionListener(new ActionListener() {
             @Override
@@ -504,7 +551,7 @@ public class GenSim extends JFrame implements Runnable {
             }
         });
         chiSquaredItem.setMnemonic('s');
-        
+
         mbar.add(statsMenu);
         statsMenu.add(countItem);
         statsMenu.add(chiSquaredItem);
@@ -515,40 +562,34 @@ public class GenSim extends JFrame implements Runnable {
 
         JMenu fontMenu = new JMenu("Font");
         fontMenu.setMnemonic('f');
-        
+
         JMenuItem smallFontItem = new JMenuItem("Small");
         smallFontItem.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent e) {
                 changeGlobalFontSize(-1);
             }
-            
         });
         smallFontItem.setMnemonic('m');
-        
+
         JMenuItem normalFontItem = new JMenuItem("Normal");
         normalFontItem.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent e) {
                 changeGlobalFontSize(0);
             }
-            
         });
         normalFontItem.setMnemonic('n');
-        
+
         JMenuItem largeFontItem = new JMenuItem("Large");
         largeFontItem.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent e) {
                 changeGlobalFontSize(2);
             }
-            
         });
         largeFontItem.setMnemonic('l');
-        
+
         fontMenu.add(smallFontItem);
         fontMenu.add(normalFontItem);
         fontMenu.add(largeFontItem);
@@ -663,8 +704,8 @@ public class GenSim extends JFrame implements Runnable {
                 if (selected.length == 0) {
                     toCount = animals;
                 } else {
-                    for(int row : selected) {
-                        toCount.add(animals.get(Integer.parseInt((String)tableModel.getValueAt(row, 0)) - 1));
+                    for (int row : selected) {
+                        toCount.add(animals.get(Integer.parseInt((String) tableModel.getValueAt(row, 0)) - 1));
                     }
                 }
                 new CounterPopup().showCounterDialog(toCount);
@@ -680,19 +721,31 @@ public class GenSim extends JFrame implements Runnable {
             }
         });
         toolBar.add(chiSquaredButton);
-        
+
         JButton chickenViewButton = new JButton("View Chicken");
         chickenViewButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int[] selected = table.getSelectedRows();
                 if (selected.length > 0) {
-                    ChickenDisplay.showChickenDisplay((Chicken)animals.get(Integer.parseInt((String)table.getValueAt(selected[0], 0))-1));
+                    ChickenDisplay.showChickenDisplay((Chicken) animals.get(Integer.parseInt((String) table.getValueAt(selected[0], 0)) - 1));
                 }
             }
         });
         toolBar.add(chickenViewButton);
+        
+        JButton showParentsButton = new JButton("Show Parents");
+        showParentsButton.addActionListener(new ActionListener() {
 
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selected = table.getSelectedRow();
+                selected = Integer.parseInt((String) table.getValueAt(selected, 0)) - 1;
+                new ParentDisplayWindow().showParents((Chicken)animals.get(selected));
+            }
+            
+        });
+        toolBar.add(showParentsButton);
 
         toolBar.setFloatable(false);
         toolBar.setRollover(true);
@@ -755,12 +808,21 @@ public class GenSim extends JFrame implements Runnable {
         repaint();
     }
 
+    private void removeRow(int row) {
+        tableModel.removeRow(row);
+        table.setModel(tableModel);
+        isSaved = false;
+        fixTitle();
+        table.repaint();
+        repaint();
+    }
+
     private int selectOpenFile() {
         JFileChooser fc = new JFileChooser();
         FileNameExtensionFilter textFilter = new FileNameExtensionFilter("GenSim file", "gsm");
 
         fc.setFileFilter(textFilter);
-        
+
 
         int chosen = fc.showOpenDialog(GenSim.this);
 
@@ -778,19 +840,29 @@ public class GenSim extends JFrame implements Runnable {
 
         fc.setFileFilter(textFilter);
 
-        int chosen = fc.showSaveDialog(GenSim.this);
+        int chosen;
+        boolean goodFile;
+        do {
+            goodFile = true;
+            chosen = fc.showSaveDialog(GenSim.this);
 
-
-        if (chosen == JFileChooser.APPROVE_OPTION) {
-            currentFile = fc.getSelectedFile();
-            try {
-                String fileName = currentFile.getCanonicalPath();
-                if(!fileName.endsWith(".gsm")) {
-                    currentFile = new File(fileName + ".gsm");
+            if (chosen == JFileChooser.APPROVE_OPTION) {
+                currentFile = fc.getSelectedFile();
+                try {
+                    String fileName = currentFile.getCanonicalPath();
+                    if (!fileName.endsWith(".gsm")) {
+                        currentFile = new File(fileName + ".gsm");
+                    }
+                } catch (IOException ex) {
                 }
-            } catch (IOException ex) {
             }
-        }
+            if (currentFile != null && currentFile.exists()) {
+                int overwrite = JOptionPane.showConfirmDialog(GenSim.this, "This file already exists. Overrite the current file?", "Warning!",JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+                if (overwrite == JOptionPane.CANCEL_OPTION) {
+                    goodFile = false;
+                }
+            }
+        } while(!goodFile);
 
         return chosen;
     }
@@ -817,18 +889,48 @@ public class GenSim extends JFrame implements Runnable {
         }
     }
 
+    private void removeAnimal(int index) {
+        if (index < animals.size() && index >= 0) {
+            //System.out.println("Removing row " + index);
+            animals.remove(index);
+            animalCount.decrementAndGet();
+
+            if (index == mother) {
+                mother = -1;
+            } else if (index < mother) {
+                mother--;
+            }
+
+            if (index == father) {
+                father = -1;
+            } else if (index < father) {
+                father--;
+            }
+
+            removeRow(index);
+
+            for (; index < getAnimalCount(); index++) {
+                int oldNumber = Integer.parseInt((String) tableModel.getValueAt(index, 0));
+                tableModel.setValueAt(String.valueOf(oldNumber - 1), index, 0);
+            }
+            statusBar.setCount(getAnimalCount());
+            table.revalidate();
+            repaint();
+        }
+    }
+
     private int getAnimalCount() {
         return animalCount.get();
     }
 
     private void fixTitle() {
-        if (isSaved) {
+        if (isSaved) {  // if the file is marked as unsaved add an asterisk to the title
             setTitle("GenSim");
         } else {
             setTitle("GenSim*");
         }
     }
-    
+
     private void changeGlobalFontSize(int change) {
         changeFontSize("Button.font", change);
         changeFontSize("TextField.font", change);
@@ -841,16 +943,16 @@ public class GenSim extends JFrame implements Runnable {
         changeFontSize("RadioButton.font", change);
         javax.swing.SwingUtilities.updateComponentTreeUI(this);
     }
-    
+
     private void changeFontSize(String key, int change) {
         LookAndFeel sysDefault = null;
         try {
-            sysDefault = (LookAndFeel) Class.forName(UIManager.getSystemLookAndFeelClassName()).newInstance();
+            sysDefault = (LookAndFeel) Class.forName(UIManager.getSystemLookAndFeelClassName()).newInstance();  // get the default look and feel for the computer
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
         }
-        Font defaultFont = sysDefault.getDefaults().getFont(key);
-        FontUIResource res = new FontUIResource(defaultFont.deriveFont(defaultFont.getSize2D() + change));
-        UIManager.put(key, res);
+        Font defaultFont = sysDefault.getDefaults().getFont(key);   // get the default font for the default look and feel
+        FontUIResource res = new FontUIResource(defaultFont.deriveFont(defaultFont.getSize2D() + change));  // make a new version of the default font with the text size increased/decreased by 'change'
+        UIManager.put(key, res);    // change the old font to the new one
     }
 
     protected class StatusBar extends JPanel {

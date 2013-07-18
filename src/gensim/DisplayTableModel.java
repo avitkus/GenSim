@@ -106,4 +106,13 @@ public class DisplayTableModel implements TableModel {
             tml.tableChanged(new TableModelEvent(this, data.size() - 1, data.size() - 1, row.length, TableModelEvent.INSERT));
         }
     }
+    
+    public boolean removeRow(int row) {
+        if (row < data.size() && row >= 0) {
+            data.remove(row);
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

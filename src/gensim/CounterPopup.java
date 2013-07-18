@@ -20,6 +20,7 @@ package gensim;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public class CounterPopup extends JFrame {
         } 
         catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) { }
         
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/GenSim icon large.png")));
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
@@ -138,7 +140,7 @@ public class CounterPopup extends JFrame {
         eggShellColorCombo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                keys[5] = eggShellColorCombo.getItemAt(eggShellColorCombo.getSelectedIndex());
+                keys[6] = eggShellColorCombo.getItemAt(eggShellColorCombo.getSelectedIndex());
                 count.setText("Total: " + count());
             }
         });
@@ -150,7 +152,7 @@ public class CounterPopup extends JFrame {
 
         for (Animal a : animals) {
             boolean match = true;
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < keys.length; i++) {
                 if (!keys[i].equals("Any")) {
                     if (!keys[i].equals(a.getPhenotypes()[i])) {
                         match = false;

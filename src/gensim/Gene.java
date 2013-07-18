@@ -47,4 +47,14 @@ public abstract class Gene implements java.io.Serializable {
 
         return (String[]) alleles.toArray();
     }
+    
+    public static String getPhenotypeForGenotype(String genotype) {
+        for (int i = 0; i < genotypes.length; i++) {
+            if (genotypes[i].equals(genotype)) {
+                System.out.println(genotype + " --> " + phenotypes[i]);
+                return phenotypes[i];
+            }
+        }
+        return "";
+    }
 }

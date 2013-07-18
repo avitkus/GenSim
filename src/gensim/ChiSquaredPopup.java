@@ -20,6 +20,7 @@ package gensim;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JFrame;
@@ -53,6 +54,8 @@ public class ChiSquaredPopup extends JFrame {
             buildWindow();
             setSize(75 * (degreesOfFreedom + 2), 150);
             setTitle("Chi-Squared Test");
+            
+            setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/GenSim icon large.png")));
             setVisible(true);
         }
     }
