@@ -42,13 +42,20 @@ public class ChiSquaredPopup extends JFrame {
         boolean cancel = false;
         do {
             try {
-                degreesOfFreedom = Integer.parseInt(JOptionPane.showInputDialog(ChiSquaredPopup.this, "How many degrees of freedom?", "Enter a number.", JOptionPane.QUESTION_MESSAGE));
-            } catch (NumberFormatException ex) {
+                String response = JOptionPane.showInputDialog(ChiSquaredPopup.this, "How many degrees of freedom?", "Enter a number.", JOptionPane.QUESTION_MESSAGE);
+                if (response == null) {
+                    return;
+                }
+                degreesOfFreedom = Integer.parseInt(response);
+                if (degreesOfFreedom <= 0) {
+                    throw new IllegalArgumentException("Degrees of freedom '" + degreesOfFreedom + "' is invalid. Must be 1 or greater!");
+                }
+            } catch (IllegalArgumentException ex) {
                 if (JOptionPane.showConfirmDialog(ChiSquaredPopup.this, "Invalid degrees of freedom!", "Error!", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) {
                     cancel = true;
                 }
             }
-        } while (degreesOfFreedom == 0 && !cancel);
+        } while (degreesOfFreedom <= 0 && !cancel);
 
         if (!cancel) {
             buildWindow();
@@ -115,7 +122,7 @@ public class ChiSquaredPopup extends JFrame {
 
         for (int i = 0; i <= degreesOfFreedom; i++) {
             try {
-                value += (Math.pow(Integer.parseInt(observed[i].getText()) - Integer.parseInt(expected[i].getText()), 2) / Integer.parseInt(expected[i].getText()));
+                value += (Math.pow(Double.parseDouble(observed[i].getText()) - Double.parseDouble(expected[i].getText()), 2) / Double.parseDouble(expected[i].getText()));
             } catch(NumberFormatException ex) {}
         }
 

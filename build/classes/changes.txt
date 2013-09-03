@@ -1,7 +1,0 @@
-change text size
-remove/save selection
-track parents
-images
-fix file extension stuff
-chi-squared analysis
-show chi-squared equation
