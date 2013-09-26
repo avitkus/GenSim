@@ -14,12 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package gensim;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.imageio.ImageIO;
@@ -35,47 +36,67 @@ import javax.swing.UnsupportedLookAndFeelException;
  * @author Andrew Vitkus
  */
 public class ChickenDisplay extends JFrame implements Runnable {
+
     private Chicken c;
-    
+
     private ChickenDisplay(Chicken c) {
         super("Chicken Viewer");
         this.c = c;
     }
 
-    
     @Override
     public void run() {
-        setSize(300,300);
+        setSize(300, 300);
         setResizable(false);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLocationByPlatform(true);
-        
+
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) { }
-        
+        } catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+        }
+
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/GenSim icon large.png")));
-        
+
         BufferedImage chicken = buildChickenImage(c.getPhenotypes());
         if (chicken != null) {
             JPanel view = new JPanel();
             view.paint(chicken.getGraphics());
             add(new JLabel(new ImageIcon(chicken)));
         }
+
+
+        addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (hasFocus() && e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    dispose();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+            }
+        });
+
         setVisible(true);
     }
-    
+
     public static void showChickenDisplay(Chicken c) {
         javax.swing.SwingUtilities.invokeLater(new ChickenDisplay(c));
     }
-    
+
     private BufferedImage buildChickenImage(String[] phenotypes) {
         try {
-            BufferedImage chickenImg = new BufferedImage(300,300,BufferedImage.TYPE_INT_ARGB);
+            BufferedImage chickenImg = new BufferedImage(300, 300, BufferedImage.TYPE_INT_ARGB);
             Graphics2D chicken = chickenImg.createGraphics();
             chicken.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-            
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+
             chicken.drawImage(ImageIO.read(getClass().getResource("/images/legs/" + phenotypes[0] + "-" + phenotypes[4] + ".png")), 0, 0, null);;
             //System.out.println("/images/body/" + phenotypes[1] + "-" + phenotypes[3] + "-" + phenotypes[2] + "-" + phenotypes[0] + ".png");
             chicken.drawImage(ImageIO.read(getClass().getResource("/images/body/" + phenotypes[1] + "-" + phenotypes[3] + "-" + phenotypes[2] + "-" + phenotypes[0] + ".png")), 0, 0, null);

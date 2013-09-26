@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package gensim;
 
 import java.awt.Component;
@@ -23,10 +22,14 @@ import java.awt.GridBagLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 
 /**
  *
@@ -37,7 +40,7 @@ public class ChiSquaredPopup extends JFrame {
     private int degreesOfFreedom = 0;
     private JTextField[] expected;
     private JTextField[] observed;
-    
+
     public void showTestWindow() {
         boolean cancel = false;
         do {
@@ -61,8 +64,9 @@ public class ChiSquaredPopup extends JFrame {
             buildWindow();
             setSize(75 * (degreesOfFreedom + 2), 150);
             setTitle("Chi-Squared Test");
-            
+
             setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/GenSim icon large.png")));
+
             setVisible(true);
         }
     }
@@ -82,26 +86,30 @@ public class ChiSquaredPopup extends JFrame {
 
         for (int i = 0; i <= degreesOfFreedom; i++) {
             expected[i] = new JTextField(null, 4);
-            expected[i].addActionListener(new ActionListener() {
+            expected[i].addCaretListener(new CaretListener() {
+
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                public void caretUpdate(CaretEvent e) {
                     if (isFilled()) {
                         chiSquaredValue.setText("Chi-squared: " + calculate());
                         repaint();
                     }
                 }
+                
             });
             addComponent(expected[i], 1, i, 1);
 
             observed[i] = new JTextField(null, 4);
-            observed[i].addActionListener(new ActionListener() {
+            observed[i].addCaretListener(new CaretListener() {
+
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                public void caretUpdate(CaretEvent e) {
                     if (isFilled()) {
                         chiSquaredValue.setText("Chi-squared: " + calculate());
                         repaint();
                     }
                 }
+                
             });
             addComponent(observed[i], 1, i, 3);
         }
@@ -109,11 +117,11 @@ public class ChiSquaredPopup extends JFrame {
 
     private boolean isFilled() {
         for (int i = 0; i <= degreesOfFreedom; i++) {
-            if ((expected[i].getText() == null) || (observed[i].getText() == null)) {
+            if (expected[i].getText().isEmpty() || observed[i].getText().isEmpty()) {
                 return false;
             }
         }
-
+        //System.out.println("I am filled!");
         return true;
     }
 
@@ -123,8 +131,12 @@ public class ChiSquaredPopup extends JFrame {
         for (int i = 0; i <= degreesOfFreedom; i++) {
             try {
                 value += (Math.pow(Double.parseDouble(observed[i].getText()) - Double.parseDouble(expected[i].getText()), 2) / Double.parseDouble(expected[i].getText()));
-            } catch(NumberFormatException ex) {}
+            } catch (NumberFormatException ex) {
+            }
         }
+        
+        long valRound = Math.round(value * 1000);
+        value = valRound / 1000;
 
         return value;
     }

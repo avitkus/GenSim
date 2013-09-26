@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package gensim;
 
 import java.awt.Component;
@@ -23,6 +22,8 @@ import java.awt.GridBagLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import javax.swing.JFrame;
@@ -46,21 +47,41 @@ public class CounterPopup extends JFrame {
         Arrays.fill(keys, "Any");
 
         buildDisplay();
-        
+
         setLocationByPlatform(true);
         setSize(300, 250);
 
         setTitle("Counter");
-        setVisible(true);
-        
+
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } 
-        catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) { }
-        
+        } catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+        }
+
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/GenSim icon large.png")));
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+
+
+        addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (hasFocus() && e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    dispose();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+            }
+        });
+        
+        setVisible(true);
     }
 
     private void buildDisplay() {
@@ -134,7 +155,7 @@ public class CounterPopup extends JFrame {
             }
         });
         addComponent(bredaCombCombo, 1, 1, 5);
-        
+
         addComponent(new JLabel("Egg Shell Color:"), 1, 0, 6);
         final JComboBox<String> eggShellColorCombo = new JComboBox<>(new String[]{"Any", "White", "Blue"});
         eggShellColorCombo.addActionListener(new ActionListener() {

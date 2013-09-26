@@ -17,6 +17,14 @@
 
 package gensim;
 
+import genes.Gene;
+import genes.FrizzleFeatherGene;
+import genes.ShellColorGene;
+import genes.BredaCombGene;
+import genes.CreeperLegGene;
+import genes.BlackFeatherGene;
+import genes.BarredFeatherGene;
+import genes.ColumbianFeatherGene;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**

@@ -25,6 +25,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -61,7 +63,7 @@ public class AboutWindow extends JFrame implements Runnable {
         }
         setSize(400, 400);
         buildWindow();
-
+        
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/GenSim icon large.png")));
         setLocationByPlatform(true);
         setResizable(false);
@@ -92,22 +94,6 @@ public class AboutWindow extends JFrame implements Runnable {
                 }
             }
         });
-        /*
-        JLabel versionLabel = new JLabel("GenSim v 1.2");
-        JLabel codedLabel = new JLabel("Coded by: Andrew Vitkus");
-        JLabel logoArtLabel = new JLabel("Logo art by: Andrew Vitkus");
-        JLabel chickenArtLabel = new JLabel("Chicken art by: Fred Hurteau");
-        JLabel updatedLabel = new JLabel("Last Updated: 7/2013");
-        JLabel copyrightLabel = new JLabel("Copyright 2013");
-        JLabel websiteLabel = new JLabel("Visit our site to check for updates");
-        JLabel addressLabel = new JLabel("http://sourceforge.net/projects/gen-sim/");
-
-        addComponent(mainTab, versionLabel, GridBagConstraints.WEST, 1, 0, 0);
-        addComponent(mainTab, codedLabel, GridBagConstraints.WEST, 1, 0, 2);
-        addComponent(mainTab, logoArtLabel, GridBagConstraints.WEST, 1, 0, 3);
-        addComponent(mainTab, chickenArtLabel, GridBagConstraints.WEST, 1, 0, 4);
-        addComponent(mainTab, updatedLabel, GridBagConstraints.WEST, 1, 0, 6);
-        addComponent(mainTab, copyrightLabel, GridBagConstraints.WEST, 1, 0, 8);*/
 
         mainTab.add(aboutText);
         JTabbedPane licenseTabs = new JTabbedPane();

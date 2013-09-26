@@ -14,13 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package gensim;
 
 import java.awt.BorderLayout;
 import java.awt.Toolkit;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -34,8 +35,8 @@ import javax.swing.table.TableColumn;
  *
  * @author Andrew Vitkus
  */
-public class ParentDisplayWindow extends JFrame{
-    
+public class ParentDisplayWindow extends JFrame {
+
     public void showParents(Chicken c) {
         if (c.getParents()[0] == null) {
             JOptionPane.showMessageDialog(rootPane, "No records exist for this chicken's parents!");
@@ -52,7 +53,7 @@ public class ParentDisplayWindow extends JFrame{
                 tableModel.addColumn(animalTitles[i]);
             }
 
-            for(Animal parent : c.getParents()) {
+            for (Animal parent : c.getParents()) {
                 tableModel.addRow(parent.getPhenotypes());
             }
 
@@ -69,26 +70,42 @@ public class ParentDisplayWindow extends JFrame{
             add(new JScrollPane(table), BorderLayout.CENTER);
 
             addFocusListener(new FocusListener() {
-
                 @Override
-                public void focusGained(FocusEvent e) { }
+                public void focusGained(FocusEvent e) {
+                }
 
                 @Override
                 public void focusLost(FocusEvent e) {
                     dispose();
                 }
-                
+            });
+
+            addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+                }
+
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                        dispose();
+                    }
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+                }
             });
         }
     }
-    
+
     private void buildWindow() {
         setSize(550, 87);
         setResizable(false);
         setLocationByPlatform(true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/GenSim icon large.png")));
+        setTitle("Chicken Parents' Phenotypes");
         setVisible(true);
     }
-    
 }
