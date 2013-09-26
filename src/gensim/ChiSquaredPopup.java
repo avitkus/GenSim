@@ -135,8 +135,7 @@ public class ChiSquaredPopup extends JFrame {
             }
         }
         
-        long valRound = Math.round(value * 1000);
-        value = valRound / 1000;
+        value = (double)Math.round(value * 1000) / 1000.;
 
         return value;
     }
