@@ -35,7 +35,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.standard.JobName;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
@@ -61,15 +64,13 @@ import javax.swing.table.TableRowSorter;
  *
  * @author Andrew Vitkus
  */
-public class MainWindow extends JFrame implements Runnable {
+public class MainWindow extends JFrame implements Runnable, AddAnimalEventListener {
 
     private File currentFile;
     private boolean isSaved;
     private ArrayList<Animal> animals;
-    private int mother;
-    private int father;
+    private int mother, father, clutchSize;
     private String[] animalTitles;
-    private int clutchSize;
     private AtomicInteger animalCount;
     private JTable table;
     private DisplayTableModel tableModel;
@@ -112,32 +113,33 @@ public class MainWindow extends JFrame implements Runnable {
         showStatusBar();
         showToolBar();
 
+        AddAnimalPopup add = new AddAnimalPopup();
+        add.addAddAnimalEventListener(this);
+
         table.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
-                if (table.hasFocus()) {
-                    switch (e.getKeyChar()) {
-                        case 'a':
-                            runChickenBuilder();
-                            break;
-                        case 'c':
-                            runCount();
-                            break;
-                        case 'p':
-                            setParentFromSelected();
-                            break;
-                        case 'm':
-                            runMating();
-                            break;
-                        case 's':
-                            runShowParents();
-                            break;
-                        case 'v':
-                            runChickenView();
-                            break;
-                        default:
-                            break;
-                    }
+                switch (e.getKeyChar()) {
+                    case 'a':
+                        runChickenBuilder();
+                        break;
+                    case 'c':
+                        runCount();
+                        break;
+                    case 'p':
+                        setParentFromSelected();
+                        break;
+                    case 'm':
+                        runMating();
+                        break;
+                    case 's':
+                        runShowParents();
+                        break;
+                    case 'v':
+                        runChickenView();
+                        break;
+                    default:
+                        break;
                 }
             }
 
@@ -147,7 +149,7 @@ public class MainWindow extends JFrame implements Runnable {
 
             @Override
             public void keyReleased(KeyEvent e) {
-                if (table.hasFocus() && e.getKeyCode() == KeyEvent.VK_DELETE) {
+                if (e.getKeyCode() == KeyEvent.VK_DELETE) {
                     runRemoveSelected();
                 }
             }
@@ -203,9 +205,11 @@ public class MainWindow extends JFrame implements Runnable {
             public void windowDeactivated(WindowEvent e) {
             }
         });
-        
+
+        fixTitle();
+
         setVisible(true);
-        
+
         table.requestFocusInWindow();
     }
 
@@ -281,10 +285,6 @@ public class MainWindow extends JFrame implements Runnable {
                         setupTable();
 
                         for (Animal a : tmp) {
-                            /*for (String str : a.getPhenotypes()) {
-                             System.out.print(str + " ");
-                             }
-                             System.out.println();*/
                             addAnimal(a);
                         }
 
@@ -364,7 +364,23 @@ public class MainWindow extends JFrame implements Runnable {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    table.print(JTable.PrintMode.FIT_WIDTH);
+                    HashPrintRequestAttributeSet printAttributes = new HashPrintRequestAttributeSet();
+                    Locale locale;
+                    if (System.getProperty("user.region") == null) {
+                        locale = new Locale(System.getProperty("user.language"));
+                    } else {
+                        locale = new Locale(System.getProperty("user.language"), System.getProperty("user.region"));
+                    }
+                    if (currentFile == null) {
+                        printAttributes.add(new JobName("GenSim Print", locale));
+                    } else {
+                        String name = currentFile.getName();
+                        if (name.lastIndexOf('.') != -1) {
+                            name = name.substring(0, name.lastIndexOf('.'));
+                        }
+                        printAttributes.add(new JobName(name, locale));
+                    }
+                    table.print(JTable.PrintMode.FIT_WIDTH, null, null, true, printAttributes, true);
                 } catch (PrinterException ex) {
                 }
             }
@@ -433,14 +449,11 @@ public class MainWindow extends JFrame implements Runnable {
                     String buf = JOptionPane.showInputDialog(MainWindow.this, "Enter the clutch size", clutchSize);
                     try {
                         newSize = Integer.parseInt(buf);
-                        if (newSize < 1) {
-                            throw new NumberFormatException();
-                        }
-                        if (newSize > 10) {
+                        if (newSize < 1 || newSize > 10) {
                             throw new IllegalArgumentException();
                         }
                     } catch (NumberFormatException ex) {
-                        int choice = JOptionPane.showConfirmDialog(MainWindow.this, "Invalid clutch size, must be greater than 0", "Error", JOptionPane.OK_CANCEL_OPTION);
+                        int choice = JOptionPane.showConfirmDialog(MainWindow.this, "Invalid clutch size, please enter a number!", "Error", JOptionPane.OK_CANCEL_OPTION);
                         if (choice == JOptionPane.OK_OPTION) {
                             okay = false;
                         } else if (choice == JOptionPane.CANCEL_OPTION) {
@@ -448,7 +461,7 @@ public class MainWindow extends JFrame implements Runnable {
                             okay = true;
                         }
                     } catch (IllegalArgumentException ex) {
-                        int choice = JOptionPane.showConfirmDialog(MainWindow.this, "Invalid clutch size, must be 10 or smaller", "Error", JOptionPane.OK_CANCEL_OPTION);
+                        int choice = JOptionPane.showConfirmDialog(MainWindow.this, "Invalid clutch size, must be in the range 1-10!", "Error", JOptionPane.OK_CANCEL_OPTION);
                         if (choice == JOptionPane.OK_OPTION) {
                             okay = false;
                         } else if (choice == JOptionPane.CANCEL_OPTION) {
@@ -475,10 +488,7 @@ public class MainWindow extends JFrame implements Runnable {
         viewItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int[] selected = table.getSelectedRows();
-                if (selected.length > 0) {
-                    ChickenDisplay.showChickenDisplay((Chicken) animals.get(Integer.parseInt((String) table.getValueAt(selected[0], 0)) - 1));
-                }
+                runChickenView();
             }
         });
         viewItem.setMnemonic('v');
@@ -487,9 +497,7 @@ public class MainWindow extends JFrame implements Runnable {
         showParentsItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int selected = table.getSelectedRow();
-                selected = Integer.parseInt((String) table.getValueAt(selected, 0)) - 1;
-                new ParentDisplayWindow().showParents((Chicken) animals.get(selected));
+                runShowParents();
             }
         });
         showParentsItem.setMnemonic('p');
@@ -522,9 +530,7 @@ public class MainWindow extends JFrame implements Runnable {
         chiSquaredItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println(UIManager.getString("OptionPaneUI"));
-                System.out.println(UIManager.getString("Label.font"));
-                new ChiSquaredPopup().showTestWindow();
+                runChiSquared();
             }
         });
         chiSquaredItem.setMnemonic('s');
@@ -635,11 +641,7 @@ public class MainWindow extends JFrame implements Runnable {
         mateButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                for (int i = 0; i < clutchSize; i++) {
-                    if (mother != -1 && father != -1) {
-                        addAnimal(animals.get(mother).breed(animals.get(father)));
-                    }
-                }
+                runMating();
             }
         });
         toolBar.add(mateButton);
@@ -668,7 +670,7 @@ public class MainWindow extends JFrame implements Runnable {
         chiSquaredButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new ChiSquaredPopup().showTestWindow();
+                runChiSquared();
             }
         });
         toolBar.add(chiSquaredButton);
@@ -721,7 +723,6 @@ public class MainWindow extends JFrame implements Runnable {
             columnModel.getColumn(i + 2).setHeaderValue(animalTitles[i]);
             columnModel.getColumn(i + 2).setPreferredWidth((int) (animalTitles[i].length() * 4.5));
         }
-        //table.setColumnModel(columnModel);
         TableRowSorter sorter = new TableRowSorter(tableModel);
 
         sorter.setComparator(0, new Comparator<String>() {
@@ -868,10 +869,19 @@ public class MainWindow extends JFrame implements Runnable {
     }
 
     private void fixTitle() {
-        if (isSaved) {  // if the file is marked as unsaved add an asterisk to the title
-            setTitle("GenSim");
+        String fileName;
+        if (currentFile == null) {
+            fileName = "New Simulation";
         } else {
-            setTitle("GenSim*");
+            fileName = currentFile.getName();
+            if (fileName.lastIndexOf('.') != -1) {
+                fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+            }
+        }
+        if (isSaved) {  // if the file is marked as unsaved add an asterisk to the title
+            setTitle("GenSim: " + fileName);
+        } else {
+            setTitle("GenSim: " + fileName + "*");
         }
     }
 
@@ -934,35 +944,9 @@ public class MainWindow extends JFrame implements Runnable {
     }
 
     private void runMating() {
-        int cores = Runtime.getRuntime().availableProcessors();
-        int threads = clutchSize / 500;
-        if (threads < 1) {
-            threads = 1;
-        } else if (threads > cores) {
-            threads = cores;
-        }
-
-        int initial = animalCount.get();
-        int size = Math.max(clutchSize / threads, 500);
-
-        for (int start = 0; start < clutchSize; start += size) {
-            final int end = Math.min(clutchSize, start + size);
-            new Thread() {
-                @Override
-                public void run() {
-                    for (int i = 0; i < end; i++) {
-                        if (mother != -1 && father != -1) {
-                            addAnimal(animals.get(mother).breed(animals.get(father)));
-                        }
-                    }
-                }
-            }.start();
-        }
-
-        while (animalCount.get() - initial < clutchSize) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException ex) {
+        if (mother != -1 && father != -1) {
+            for (int i = 0; i < clutchSize; i++) {
+                addAnimal(animals.get(mother).breed(animals.get(father)));
             }
         }
     }
@@ -981,12 +965,8 @@ public class MainWindow extends JFrame implements Runnable {
     }
 
     private void runChickenBuilder() {
-        new Thread() {
-            @Override
-            public void run() {
-                addAnimal(new AddAnimalPopup().showAddAnimalDialog());
-            }
-        }.start();
+        AddAnimalPopup add = new AddAnimalPopup();
+        add.showAddAnimalDialog();
     }
 
     private void runRemoveSelected() {
@@ -996,5 +976,14 @@ public class MainWindow extends JFrame implements Runnable {
                 removeAnimal(selected[i]);
             }
         }
+    }
+
+    private void runChiSquared() {
+        new ChiSquaredPopup().showTestWindow();
+    }
+
+    @Override
+    public void animalAdded(AddAnimalEvent e) {
+        addAnimal(e.getAnimal());
     }
 }

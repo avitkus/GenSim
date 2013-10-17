@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package gensim;
 
 import java.awt.Component;
@@ -23,12 +22,16 @@ import java.awt.GridBagLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.Observable;
 import java.util.Random;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
+import javax.swing.event.EventListenerList;
 
 /**
  *
@@ -38,26 +41,11 @@ public class AddAnimalPopup extends JFrame {
 
     private String[] genotype = new String[7];
     private Integer[] geneSelections = {0, 0, 0, 0, 0, 0, 0};
-    protected int selection = -1;
+    private static EventListenerList listenerList = new EventListenerList();
+    private AddAnimalEvent addAnimalEvent = null;
 
-    public String[] showAddAnimalDialog() {
+    public void showAddAnimalDialog() {
         setup();
-
-        while (selection == -1) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-            }
-        }
-
-        removeAll();
-        dispose();
-
-        if (selection == 0) {
-            buildGenotypeFromPhenotype();
-            return genotype;
-        }
-        return null;
     }
 
     private void buildGenotypeFromPhenotype() {
@@ -123,7 +111,7 @@ public class AddAnimalPopup extends JFrame {
         }
 
         genotype[4] = geneSelections[4] == 0 ? "cc" : "Cc";
-        
+
         if (geneSelections[5] == 0) {
             genotype[5] = "B";
             genotype[5] += Math.random() < .5 ? "B" : "b";
@@ -146,9 +134,10 @@ public class AddAnimalPopup extends JFrame {
 
         buildWindow();
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setVisible(true);
-        
+
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/GenSim icon large.png")));
+
+        setVisible(true);
     }
 
     private void buildWindow() {
@@ -310,7 +299,7 @@ public class AddAnimalPopup extends JFrame {
 
         addComponent(combButton, 3, 0, 11);
         addComponent(comblessButton, 3, 4, 11);
-        
+
         addComponent(new JLabel("Egg Shell Color:"), GridBagConstraints.BOTH, 6, 0, 12);
         ButtonGroup shellColorButtons = new ButtonGroup();
         JRadioButton blueShellButton = new JRadioButton("Blue");
@@ -339,19 +328,24 @@ public class AddAnimalPopup extends JFrame {
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                selection = 0;
+                buildGenotypeFromPhenotype();
+                Animal a = new Chicken(genotype);
+                addAnimalEvent = new AddAnimalEvent(a, this);
+                fireAddAnimalEvent();
+                removeAll();
+                dispose();
             }
         });
-
+        
         JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                selection = 1;
+                removeAll();
+                dispose();
             }
         });
-
-
+        
         addComponent(addButton, 1, 1, 14);
         addComponent(cancelButton, 1, 5, 14);
     }
@@ -379,5 +373,29 @@ public class AddAnimalPopup extends JFrame {
         c.gridy = y;
 
         add(component, c);
+    }
+
+    public void addAddAnimalEventListener(AddAnimalEventListener l) {
+        listenerList.add(AddAnimalEventListener.class, l);
+    }
+
+    public void removeAddAnimalEventListener(AddAnimalEventListener l) {
+        listenerList.remove(AddAnimalEventListener.class, l);
+    }
+
+    protected void fireAddAnimalEvent() {
+        // Guaranteed to return a non-null array
+        Object[] listeners = listenerList.getListenerList();
+        // Process the listeners last to first, notifying
+        // those that are interested in this event
+        for (int i = listeners.length - 2; i >= 0; i -= 2) {
+            if (listeners[i] == AddAnimalEventListener.class) {
+                // Lazily create the event:
+                if (addAnimalEvent == null) {
+                    addAnimalEvent = new AddAnimalEvent(this);
+                }
+                ((AddAnimalEventListener) listeners[i + 1]).animalAdded(addAnimalEvent);
+            }
+        }
     }
 }
