@@ -14,63 +14,88 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package gensim;
 
 import java.awt.GridLayout;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 /**
- * 
+ *
  * @author Andrew Vitkus
  */
-class StatusBar extends JPanel {
+class StatusBar extends JPanel implements PropertyChangeListener {
 
-        private String animalName;
-        private int animalCount;
-        private JLabel nameLabel;
-        private JLabel countLabel;
+    private String animalName;
+    private int animalCount;
+    private JLabel nameLabel;
+    private JLabel countLabel;
 
-        protected StatusBar(String name) {
-            animalName = name;
-            animalCount = 0;
+    protected StatusBar(String name) {
+        animalName = name;
+        animalCount = 0;
 
-            nameLabel = new JLabel("Animal: " + animalName);
-            countLabel = new JLabel("Animals: " + animalCount);
-            countLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        nameLabel = new JLabel("Animal: " + animalName);
+        countLabel = new JLabel("Animals: " + animalCount);
+        countLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
 
-            setLayout(new GridLayout(1, 2));
+        setLayout(new GridLayout(1, 2));
+        
+        build();
+        setVisible(true);
+    }
 
-            build();
-            setVisible(true);
-        }
+    protected void setAnimalName(String newName) {
+        animalName = newName;
 
-        protected void setAnimalName(String newName) {
-            animalName = newName;
+        nameLabel.setText("Animal: " + newName);
 
-            nameLabel.setText("Animal: " + newName);
+        repaint();
+    }
 
-            repaint();
-        }
+    protected String getAnimalName() {
+        return animalName;
+    }
 
-        protected String getAnimalName() {
-            return animalName;
-        }
+    protected void setCount(int count) {
+        animalCount = count;
 
-        protected void setCount(int count) {
-            animalCount = count;
+        countLabel.setText("Animals: " + count);
 
-            countLabel.setText("Animals: " + count);
+        repaint();
+    }
 
-            repaint();
-        }
+    protected int getCount() {
+        return animalCount;
+    }
 
-        protected int getCount() {
-            return animalCount;
-        }
+    private void build() {
+        add(nameLabel);
+        add(countLabel);
+    }
 
-        private void build() {
-            add(nameLabel);
-            add(countLabel);
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        switch (evt.getPropertyName()) {
+            case "Animal Count": {
+                Object o = evt.getNewValue();
+                if (o instanceof Integer) {
+                    setCount((Integer) evt.getNewValue());
+                }
+                break;
+            }
+            case "Animal Name": {
+                Object o = evt.getNewValue();
+                if (o instanceof String) {
+                    setAnimalName((String) evt.getNewValue());
+                }
+                break;
+            }
         }
     }
+}

@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package gensim;
 
 import java.util.ArrayList;
@@ -113,7 +112,7 @@ public class DisplayTableColumnModel implements TableColumnModel {
         }
         int cc = getColumnCount();
         for (int column = 0; column < cc; column++) {
-            xPosition = xPosition - getColumn(column).getWidth();
+            xPosition -= getColumn(column).getWidth();
             if (xPosition < 0) {
                 return column;
             }

@@ -50,12 +50,7 @@ public class ChickenDisplay extends JFrame implements Runnable {
         setResizable(false);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLocationByPlatform(true);
-
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-        }
-
+        
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/GenSim icon large.png")));
 
         BufferedImage chicken = buildChickenImage(c.getPhenotypes());
@@ -97,7 +92,7 @@ public class ChickenDisplay extends JFrame implements Runnable {
             chicken.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
 
-            chicken.drawImage(ImageIO.read(getClass().getResource("/images/legs/" + phenotypes[0] + "-" + phenotypes[4] + ".png")), 0, 0, null);;
+            chicken.drawImage(ImageIO.read(getClass().getResource("/images/legs/" + phenotypes[0] + "-" + phenotypes[4] + ".png")), 0, 0, null);
             //System.out.println("/images/body/" + phenotypes[1] + "-" + phenotypes[3] + "-" + phenotypes[2] + "-" + phenotypes[0] + ".png");
             chicken.drawImage(ImageIO.read(getClass().getResource("/images/body/" + phenotypes[1] + "-" + phenotypes[3] + "-" + phenotypes[2] + "-" + phenotypes[0] + ".png")), 0, 0, null);
             //System.out.println("/images/egg/" + phenotypes[6] + ".png");

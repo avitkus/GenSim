@@ -16,17 +16,11 @@
  */
 package gensim;
 
-import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
 import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -39,8 +33,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
@@ -57,13 +49,9 @@ public class AboutWindow extends JFrame implements Runnable {
     @Override
     public void run() {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        try {
-            UIManager.setLookAndFeel(new WindowsLookAndFeel());
-        } catch (UnsupportedLookAndFeelException ex) {
-        }
         setSize(400, 400);
         buildWindow();
-        
+
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/GenSim icon large.png")));
         setLocationByPlatform(true);
         setResizable(false);
@@ -77,7 +65,7 @@ public class AboutWindow extends JFrame implements Runnable {
 
         JEditorPane aboutText = new JEditorPane();
         try {
-            aboutText.setPage(getClass().getResource("/about.html"));
+            aboutText.setPage(getClass().getResource("/docs/about.html"));
         } catch (IOException ex) {
         }
         aboutText.setEditable(false);
@@ -103,7 +91,7 @@ public class AboutWindow extends JFrame implements Runnable {
 
 
         StringBuilder gplv3Text = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResource("/gpl.txt").openStream(), "ISO-8859-1"))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResource("/docs/gpl.txt").openStream(), "ISO-8859-1"))) {
             while (br.ready()) {
                 gplv3Text.append(br.readLine()).append("\n");
             }
@@ -127,7 +115,7 @@ public class AboutWindow extends JFrame implements Runnable {
         ccTab.add(new JLabel("Attribution-NonCommercial-ShareAlike 3.0 Unported License"), BorderLayout.NORTH);
 
         StringBuilder ccText = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResource("/cc-by-nc-sa.txt").openStream(), "ISO-8859-1"))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResource("/docs/cc-by-nc-sa.txt").openStream(), "ISO-8859-1"))) {
             while (br.ready()) {
                 ccText.append(br.readLine()).append("\n");
             }
@@ -154,18 +142,5 @@ public class AboutWindow extends JFrame implements Runnable {
         tabPane.addTab("Licenses", null, licenseTabs, "View Licenses");
 
         add(tabPane);
-    }
-
-    private void addComponent(Container dest, Component component, int fill, int width, int x, int y) {
-        GridBagConstraints c = new GridBagConstraints();
-
-        c.fill = fill;
-        c.weightx = 1;
-        c.weighty = 1;
-        c.gridwidth = width;
-        c.gridx = x;
-        c.gridy = y;
-
-        dest.add(component, c);
     }
 }

@@ -1,18 +1,18 @@
 /*
- * This file is part of MainWindow.
+ * This file is part of GenSim.
  *
- * MainWindow is free software: you can redistribute it and/or modify
+ * GenSim is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MainWindow is distributed in the hope that it will be useful,
+ * GenSim is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MainWindow.  If not, see <http://www.gnu.org/licenses/>.
+ * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
 package gensim;
 
@@ -21,10 +21,10 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.awt.print.PrinterException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,7 +36,6 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicInteger;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.standard.JobName;
 import javax.swing.JButton;
@@ -69,9 +68,8 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
     private File currentFile;
     private boolean isSaved;
     private ArrayList<Animal> animals;
-    private int mother, father, clutchSize;
+    private int mother, father, clutchSize, animalCount;
     private String[] animalTitles;
-    private AtomicInteger animalCount;
     private JTable table;
     private DisplayTableModel tableModel;
     private StatusBar statusBar;
@@ -90,7 +88,7 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
 
         mother = -1;
         father = -1;
-        animalCount = new AtomicInteger(0);
+        animalCount = 0;
 
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/GenSim icon large.png")));
     }
@@ -110,101 +108,12 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
         makeToolBar();
 
         setupTable();
+        setupListeners();
+
         showStatusBar();
         showToolBar();
 
-        AddAnimalPopup add = new AddAnimalPopup();
-        add.addAddAnimalEventListener(this);
-
-        table.addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-                switch (e.getKeyChar()) {
-                    case 'a':
-                        runChickenBuilder();
-                        break;
-                    case 'c':
-                        runCount();
-                        break;
-                    case 'p':
-                        setParentFromSelected();
-                        break;
-                    case 'm':
-                        runMating();
-                        break;
-                    case 's':
-                        runShowParents();
-                        break;
-                    case 'v':
-                        runChickenView();
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            @Override
-            public void keyPressed(KeyEvent e) {
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-                    runRemoveSelected();
-                }
-            }
-        });
-
         add(new JScrollPane(table), BorderLayout.CENTER);
-
-        addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) {
-            }
-
-            @Override
-            public void windowClosing(WindowEvent e) {
-                if (!isSaved) {
-                    int choice = JOptionPane.showConfirmDialog(MainWindow.this, "Would you like to save before exiting?", "Warning!", JOptionPane.YES_NO_OPTION);
-                    if (choice == JOptionPane.YES_OPTION) {
-                        if (selectSaveFile() == JFileChooser.APPROVE_OPTION) {
-                            try {
-                                try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(currentFile))) {
-                                    oos.writeObject(animals);
-                                    oos.writeInt(father);
-                                    oos.writeInt(mother);
-                                }
-                                isSaved = true;
-                                fixTitle();
-                            } catch (FileNotFoundException ex) {
-                                System.out.printf("File %s not found\n", currentFile.getAbsolutePath());
-                            } catch (IOException ex) {
-                            }
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void windowClosed(WindowEvent e) {
-            }
-
-            @Override
-            public void windowIconified(WindowEvent e) {
-            }
-
-            @Override
-            public void windowDeiconified(WindowEvent e) {
-            }
-
-            @Override
-            public void windowActivated(WindowEvent e) {
-            }
-
-            @Override
-            public void windowDeactivated(WindowEvent e) {
-            }
-        });
 
         fixTitle();
 
@@ -245,13 +154,11 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
                             oos.writeInt(mother);
                         }
                     } catch (FileNotFoundException ex) {
-                        System.out.printf("File %s not found\n", currentFile.getAbsolutePath());
                     } catch (IOException ex) {
                     }
                 }
 
-                animalCount.set(0);
-                statusBar.setCount(0);
+                firePropertyChange("Animal Count", 0, animalCount);
                 animals.clear();
                 father = -1;
                 mother = -1;
@@ -271,8 +178,7 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
                         animals.clear();
                         father = -1;
                         mother = -1;
-                        animalCount.set(0);
-                        statusBar.setCount(0);
+                        animalCount = 0;
 
                         ArrayList<Animal> tmp;
 
@@ -284,9 +190,7 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
 
                         setupTable();
 
-                        for (Animal a : tmp) {
-                            addAnimal(a);
-                        }
+                        addAnimals(tmp);
 
                         if (mother != -1) {
                             tableModel.setValueAt("P", mother, 1);
@@ -295,17 +199,13 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
                             tableModel.setValueAt("P", father, 1);
                         }
 
-                        statusBar.setCount(getAnimalCount());
-
                         isSaved = true;
                         fixTitle();
 
                         revalidate();
                     } catch (FileNotFoundException ex) {
-                        System.out.printf("File %s not found\n", currentFile.getAbsolutePath());
                     } catch (IOException ex) {
                     } catch (ClassNotFoundException ex) {
-                        ex.printStackTrace(System.err);
                     }
                 }
             }
@@ -321,18 +221,7 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
                 }
 
                 if (!isSaved) {
-                    try {
-                        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(currentFile))) {
-                            oos.writeObject(animals);
-                            oos.writeInt(father);
-                            oos.writeInt(mother);
-                        }
-                        isSaved = true;
-                        fixTitle();
-                    } catch (FileNotFoundException ex) {
-                        System.out.printf("File %s not found\n", currentFile.getAbsolutePath());
-                    } catch (IOException ex) {
-                    }
+                    runSave();
                 }
             }
         });
@@ -342,18 +231,7 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (selectSaveFile() == JFileChooser.APPROVE_OPTION) {
-                    try {
-                        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(currentFile))) {
-                            oos.writeObject(animals);
-                            oos.writeInt(father);
-                            oos.writeInt(mother);
-                        }
-                        isSaved = true;
-                        fixTitle();
-                    } catch (FileNotFoundException ex) {
-                        System.out.printf("File %s not found\n", currentFile.getAbsolutePath());
-                    } catch (IOException ex) {
-                    }
+                    runSave();
                 }
             }
         });
@@ -812,11 +690,12 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
         return chosen;
     }
 
-    private synchronized void addAnimal(Animal a) {
+    private void addAnimal(Animal a) {
         animals.add(a);
-        animalCount.incrementAndGet();
+        int original = animalCount;
+        animalCount ++;
         String[] row = new String[a.getPhenotypes().length + 2];
-        row[0] = String.valueOf(getAnimalCount());
+        row[0] = String.valueOf(animalCount);
         row[1] = "";
         int i = 2;
         for (String name : a.getPhenotypes()) {
@@ -824,12 +703,12 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
             i++;
         }
         addRow(row);
-        statusBar.setCount(getAnimalCount());
+
+        firePropertyChange("Animal Count", original, animalCount);
     }
 
-    private void addAnimal(String[] genotype) {
-        if (genotype != null) {
-            Animal a = new Chicken(genotype);
+    private void addAnimals(ArrayList<Animal> animals) {
+        for (Animal a : animals) {
             addAnimal(a);
         }
     }
@@ -838,7 +717,7 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
         if (index < animals.size() && index >= 0) {
             //System.out.println("Removing row " + index);
             animals.remove(index);
-            animalCount.decrementAndGet();
+            animalCount --;
 
             if (index == mother) {
                 mother = -1;
@@ -854,18 +733,14 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
 
             removeRow(index);
 
-            for (; index < getAnimalCount(); index++) {
+            for (; index < animalCount; index++) {
                 int oldNumber = Integer.parseInt((String) tableModel.getValueAt(index, 0));
                 tableModel.setValueAt(String.valueOf(oldNumber - 1), index, 0);
             }
-            statusBar.setCount(getAnimalCount());
+
             table.revalidate();
             repaint();
         }
-    }
-
-    private int getAnimalCount() {
-        return animalCount.get();
     }
 
     private void fixTitle() {
@@ -911,7 +786,7 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
 
     private void setParentFromSelected() {
         int sel = table.getSelectedRow();
-        if (sel != -1 && sel < animalCount.get()) {
+        if (sel != -1 && sel < animalCount) {
             sel = Integer.parseInt((String) table.getValueAt(sel, 0)) - 1;
             isSaved = false;
             fixTitle();
@@ -928,6 +803,61 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
             }
             tableModel.setValueAt("P", sel, 1);
         }
+    }
+
+    private void setupListeners() {
+        AddAnimalPopup.addAddAnimalEventListener(this);
+
+        table.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                switch (e.getKeyChar()) {
+                    case 'a':
+                        runChickenBuilder();
+                        break;
+                    case 'c':
+                        runCount();
+                        break;
+                    case 'p':
+                        setParentFromSelected();
+                        break;
+                    case 'm':
+                        runMating();
+                        break;
+                    case 's':
+                        runShowParents();
+                        break;
+                    case 'v':
+                        runChickenView();
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+                    runRemoveSelected();
+                }
+            }
+        });
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (!isSaved) {
+                    int choice = JOptionPane.showConfirmDialog(MainWindow.this, "Would you like to save before exiting?", "Warning!", JOptionPane.YES_NO_OPTION);
+                    if (choice == JOptionPane.YES_OPTION) {
+                        if (selectSaveFile() == JFileChooser.APPROVE_OPTION) {
+                            runSave();
+                        }
+                    }
+                }
+            }
+        });
+        
+        addPropertyChangeListener(statusBar);
     }
 
     private void runCount() {
@@ -972,14 +902,30 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
     private void runRemoveSelected() {
         int[] selected = table.getSelectedRows();
         if (selected.length > 0) {
+            int original = animalCount;
             for (int i = selected.length - 1; i >= 0; i--) {
                 removeAnimal(selected[i]);
             }
+            firePropertyChange("Animal Count", original, animalCount);
         }
     }
 
     private void runChiSquared() {
         new ChiSquaredPopup().showTestWindow();
+    }
+
+    private void runSave() {
+        try {
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(currentFile))) {
+                oos.writeObject(animals);
+                oos.writeInt(father);
+                oos.writeInt(mother);
+            }
+            isSaved = true;
+            fixTitle();
+        } catch (FileNotFoundException ex) {
+        } catch (IOException ex) {
+        }
     }
 
     @Override

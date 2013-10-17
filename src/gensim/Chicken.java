@@ -17,21 +17,21 @@
 
 package gensim;
 
-import genes.Gene;
-import genes.FrizzleFeatherGene;
-import genes.ShellColorGene;
-import genes.BredaCombGene;
-import genes.CreeperLegGene;
-import genes.BlackFeatherGene;
 import genes.BarredFeatherGene;
+import genes.BlackFeatherGene;
+import genes.BredaCombGene;
 import genes.ColumbianFeatherGene;
-import java.util.concurrent.ThreadLocalRandom;
+import genes.CreeperLegGene;
+import genes.FrizzleFeatherGene;
+import genes.Gene;
+import genes.ShellColorGene;
+import java.util.Random;
 
 /**
  *
  * @author Andrew Vitkus
  */
-public class Chicken implements Animal, java.io.Serializable {
+public class Chicken implements Animal {
 
     private final int geneCount = 7;
     private Gene[] genes = new Gene[geneCount];
@@ -48,11 +48,6 @@ public class Chicken implements Animal, java.io.Serializable {
         genes[6] = new ShellColorGene(genotype[6]);
 
         buildPhenotype();
-        
-        /*for(String str : genotype) {
-            System.out.print(str + " ");
-        }
-        System.out.println();*/
     }
 
     public static String[] getTitles() {
@@ -72,7 +67,7 @@ public class Chicken implements Animal, java.io.Serializable {
     @Override
     public Animal breed(Animal a) {
         if (a instanceof Chicken) {
-            Chicken mate = (Chicken)a;
+            Chicken mate = (Chicken) a;
             if (isMale() == !mate.isMale()) {
                 String[] child = new String[geneCount];
                 do {
@@ -127,8 +122,9 @@ public class Chicken implements Animal, java.io.Serializable {
     private char[] getRandomAlleles() {
         char[] alleles = new char[geneCount];
 
+        Random rand = new Random();
         for (int i = 0; i < geneCount; i++) {
-            alleles[i] = genes[i].getGenotype().charAt(ThreadLocalRandom.current().nextInt(2));
+            alleles[i] = genes[i].getGenotype().charAt(rand.nextInt(2));
         }
 
         return alleles;

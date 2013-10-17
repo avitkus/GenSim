@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package genes;
 
 /**
@@ -52,7 +51,7 @@ public class ShellColorGene extends Gene {
                 phenotype = "White";
                 break;
             default:
-                System.err.println("Invalid genotype set for shell color!");
+            //System.err.println("Invalid genotype set for shell color!");
         }
     }
 

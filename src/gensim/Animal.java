@@ -17,11 +17,13 @@
 
 package gensim;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Andrew Vitkus
  */
-public interface Animal {
+public interface Animal extends Serializable {
 
     public Animal breed(Animal mate);
 
@@ -34,6 +36,6 @@ public interface Animal {
     public boolean isMale();
 
     public boolean isAlive();
-    
+
     public Animal[] getParents();
 }

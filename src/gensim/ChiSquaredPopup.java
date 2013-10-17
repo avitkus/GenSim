@@ -20,14 +20,12 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 
@@ -87,7 +85,6 @@ public class ChiSquaredPopup extends JFrame {
         for (int i = 0; i <= degreesOfFreedom; i++) {
             expected[i] = new JTextField(null, 4);
             expected[i].addCaretListener(new CaretListener() {
-
                 @Override
                 public void caretUpdate(CaretEvent e) {
                     if (isFilled()) {
@@ -95,13 +92,11 @@ public class ChiSquaredPopup extends JFrame {
                         repaint();
                     }
                 }
-                
             });
             addComponent(expected[i], 1, i, 1);
 
             observed[i] = new JTextField(null, 4);
             observed[i].addCaretListener(new CaretListener() {
-
                 @Override
                 public void caretUpdate(CaretEvent e) {
                     if (isFilled()) {
@@ -109,7 +104,6 @@ public class ChiSquaredPopup extends JFrame {
                         repaint();
                     }
                 }
-                
             });
             addComponent(observed[i], 1, i, 3);
         }
@@ -134,8 +128,8 @@ public class ChiSquaredPopup extends JFrame {
             } catch (NumberFormatException ex) {
             }
         }
-        
-        value = (double)Math.round(value * 1000) / 1000.;
+
+        value = (double) Math.round(value * 1000) / 1000.;
 
         return value;
     }

@@ -26,8 +26,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.Arrays;
-import javax.swing.JFrame;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -53,11 +53,6 @@ public class CounterPopup extends JFrame {
 
         setTitle("Counter");
 
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-        }
-
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/GenSim icon large.png")));
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -80,7 +75,7 @@ public class CounterPopup extends JFrame {
             public void keyReleased(KeyEvent e) {
             }
         });
-        
+
         setVisible(true);
     }
 

@@ -14,12 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package gensim;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -32,7 +29,7 @@ import javax.swing.table.TableModel;
 public class DisplayTableModel implements TableModel {
 
     protected String[] columnNames;
-    protected List<String[]> data;
+    protected ArrayList<String[]> data;
     protected EventListenerList listenerList = new EventListenerList();
 
     DisplayTableModel(String[] columnNames) {
@@ -44,8 +41,7 @@ public class DisplayTableModel implements TableModel {
             this.columnNames[i] = name;
             i++;
         }
-        //this.columnNames = columnNames;
-        data = Collections.synchronizedList(new ArrayList<String[]>());//new ArrayList<>();
+        data = new ArrayList<>();
     }
 
     @Override
@@ -106,7 +102,7 @@ public class DisplayTableModel implements TableModel {
             tml.tableChanged(new TableModelEvent(this, data.size() - 1, data.size() - 1, row.length, TableModelEvent.INSERT));
         }
     }
-    
+
     public boolean removeRow(int row) {
         if (row < data.size() && row >= 0) {
             data.remove(row);
