@@ -15,7 +15,7 @@
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package gensim;
+package gensim.windows;
 
 import java.awt.GridLayout;
 import java.beans.PropertyChangeEvent;
@@ -36,8 +36,8 @@ class StatusBar extends JPanel implements PropertyChangeListener {
     private JLabel nameLabel;
     private JLabel countLabel;
 
-    protected StatusBar(String name) {
-        animalName = name;
+    protected StatusBar() {
+        animalName = "";
         animalCount = 0;
 
         nameLabel = new JLabel("Animal: " + animalName);
@@ -85,14 +85,14 @@ class StatusBar extends JPanel implements PropertyChangeListener {
             case "Animal Count": {
                 Object o = evt.getNewValue();
                 if (o instanceof Integer) {
-                    setCount((Integer) evt.getNewValue());
+                    setCount((Integer) o);
                 }
                 break;
             }
-            case "Animal Name": {
+            case "Animal Species": {
                 Object o = evt.getNewValue();
                 if (o instanceof String) {
-                    setAnimalName((String) evt.getNewValue());
+                    setAnimalName((String) o);
                 }
                 break;
             }

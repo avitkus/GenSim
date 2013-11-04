@@ -14,8 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gensim;
+package gensim.windows;
 
+import gensim.util.AddAnimalEvent;
+import gensim.util.AddAnimalEventListener;
+import gensim.animals.Animal;
+import gensim.animals.Chicken;
+import gensim.table.DisplayTableColumnModel;
+import gensim.table.DisplayTableModel;
+import gensim.GenSim;
+import gensim.util.VersionComparator;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.Toolkit;
@@ -69,6 +77,7 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
     private boolean isSaved;
     private ArrayList<Animal> animals;
     private int mother, father, clutchSize, animalCount;
+    private String species;
     private String[] animalTitles;
     private JTable table;
     private DisplayTableModel tableModel;
@@ -82,14 +91,15 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
         currentFile = null;
         clutchSize = 4;
         animalTitles = Chicken.getTitles();
-        statusBar = new StatusBar("Chicken");
+        statusBar = new StatusBar();
         toolBar = new JToolBar();
         table = new JTable();
 
         mother = -1;
         father = -1;
         animalCount = 0;
-
+        species = "";
+        
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/GenSim icon large.png")));
     }
 
@@ -109,6 +119,9 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
 
         setupTable();
         setupListeners();
+        
+        setSpecies("Chicken");
+        setAnimalCount(0);
 
         showStatusBar();
         showToolBar();
@@ -157,8 +170,10 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
                     } catch (IOException ex) {
                     }
                 }
-
-                firePropertyChange("Animal Count", 0, animalCount);
+                
+                currentFile = null;
+                
+                setAnimalCount(0);
                 animals.clear();
                 father = -1;
                 mother = -1;
@@ -175,21 +190,37 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
             public void actionPerformed(ActionEvent e) {
                 if (selectOpenFile() == JFileChooser.APPROVE_OPTION) {
                     try {
+                        String fileVersion;
+                        String fileSpecies;
                         animals.clear();
                         father = -1;
                         mother = -1;
-                        animalCount = 0;
+                        setAnimalCount(0);
 
                         ArrayList<Animal> tmp;
 
                         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(currentFile))) {
+                            fileVersion = ois.readUTF();
+                            
+                            VersionComparator vc = new VersionComparator();
+                        
+                            if (vc.compare(fileVersion, GenSim.MINIMUM_SUPPORTED_VERSION) < 0) {
+                                JOptionPane.showMessageDialog(rootPane, "Unsupported save file version!", "Error!", JOptionPane.ERROR_MESSAGE);
+                                return;
+                            }
+                        
+                            fileSpecies = ois.readUTF();
                             tmp = (ArrayList<Animal>) ois.readObject();
                             father = ois.readInt();
                             mother = ois.readInt();
                         }
-
+                        
+                        
+                        
                         setupTable();
 
+                        setSpecies(fileSpecies);
+                        
                         addAnimals(tmp);
 
                         if (mother != -1) {
@@ -204,8 +235,7 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
 
                         revalidate();
                     } catch (FileNotFoundException ex) {
-                    } catch (IOException ex) {
-                    } catch (ClassNotFoundException ex) {
+                    } catch (IOException | ClassNotFoundException ex) {
                     }
                 }
             }
@@ -651,6 +681,13 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
 
         if (chosen == JFileChooser.APPROVE_OPTION) {
             currentFile = fc.getSelectedFile();
+            try {
+                String fileName = currentFile.getCanonicalPath();
+                if (!fileName.endsWith(".gsm")) {
+                    currentFile = new File(fileName + ".gsm");
+                }
+            } catch (IOException ex) {
+            }
         }
 
         return chosen;
@@ -692,8 +729,7 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
 
     private void addAnimal(Animal a) {
         animals.add(a);
-        int original = animalCount;
-        animalCount ++;
+        setAnimalCount(animalCount + 1);
         String[] row = new String[a.getPhenotypes().length + 2];
         row[0] = String.valueOf(animalCount);
         row[1] = "";
@@ -703,12 +739,10 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
             i++;
         }
         addRow(row);
-
-        firePropertyChange("Animal Count", original, animalCount);
     }
 
     private void addAnimals(ArrayList<Animal> animals) {
-        for (Animal a : animals) {
+        for(Animal a : animals) {
             addAnimal(a);
         }
     }
@@ -882,16 +916,18 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
     }
 
     private void runChickenView() {
-        int[] selected = table.getSelectedRows();
-        if (selected.length > 0) {
-            ChickenDisplay.showChickenDisplay((Chicken) animals.get(Integer.parseInt((String) table.getValueAt(selected[0], 0)) - 1));
+        int selected = table.getSelectedRow();
+        if (selected >= 0) {
+            ChickenDisplay.showChickenDisplay((Chicken) animals.get(Integer.parseInt((String) table.getValueAt(selected, 0)) - 1));
         }
     }
 
     private void runShowParents() {
         int selected = table.getSelectedRow();
-        selected = Integer.parseInt((String) table.getValueAt(selected, 0)) - 1;
-        new ParentDisplayWindow().showParents((Chicken) animals.get(selected));
+        if (selected >= 0) {
+            selected = Integer.parseInt((String) table.getValueAt(selected, 0)) - 1;
+            new ParentDisplayWindow().showParents((Chicken) animals.get(selected));
+        }
     }
 
     private void runChickenBuilder() {
@@ -917,6 +953,8 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
     private void runSave() {
         try {
             try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(currentFile))) {
+                oos.writeUTF(GenSim.VERSION_NUMBER);
+                oos.writeUTF(species);
                 oos.writeObject(animals);
                 oos.writeInt(father);
                 oos.writeInt(mother);
@@ -926,6 +964,21 @@ public class MainWindow extends JFrame implements Runnable, AddAnimalEventListen
         } catch (FileNotFoundException ex) {
         } catch (IOException ex) {
         }
+    }
+    
+    private void setAnimalCount(int newCount) {
+        int oldCount = animalCount;
+        animalCount = newCount;
+        
+        firePropertyChange("Animal Count", oldCount, animalCount);
+    }
+
+    
+    private void setSpecies(String newSpecies) {
+        String oldSpecies = species;
+        species = newSpecies;
+        
+        firePropertyChange("Animal Species", oldSpecies, species);
     }
 
     @Override

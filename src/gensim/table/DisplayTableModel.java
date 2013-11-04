@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gensim;
+package gensim.table;
 
 import java.util.ArrayList;
 import javax.swing.event.EventListenerList;
@@ -32,7 +32,7 @@ public class DisplayTableModel implements TableModel {
     protected ArrayList<String[]> data;
     protected EventListenerList listenerList = new EventListenerList();
 
-    DisplayTableModel(String[] columnNames) {
+    public DisplayTableModel(String[] columnNames) {
         this.columnNames = new String[columnNames.length + 2];
         this.columnNames[0] = "#";
         this.columnNames[1] = "Parent";

@@ -14,15 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gensim;
 
-import java.util.EventListener;
+package gensim.animals;
+
+import java.io.Serializable;
 
 /**
  *
  * @author Andrew Vitkus
  */
-public interface AddAnimalEventListener extends EventListener {
+public interface Animal extends Serializable {
 
-    public void animalAdded(AddAnimalEvent e);
+    public Animal breed(Animal mate);
+
+    public String[] getPhenotypes();
+
+    public String[] getGenotypes();
+
+    public String[] getGeneList();
+
+    public boolean isMale();
+
+    public boolean isAlive();
+
+    public Animal[] getParents();
 }

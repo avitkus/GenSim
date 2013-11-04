@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gensim;
+package gensim.table;
 
 import java.util.ArrayList;
 import java.util.Arrays;

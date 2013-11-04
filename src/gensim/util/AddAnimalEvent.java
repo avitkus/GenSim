@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gensim;
+package gensim.util;
 
+import gensim.animals.Animal;
 import java.util.EventObject;
 
 /**
@@ -26,12 +27,12 @@ public class AddAnimalEvent extends EventObject {
 
     private Animal a;
 
-    AddAnimalEvent(Object source) {
+    public AddAnimalEvent(Object source) {
         super(source);
         this.a = null;
     }
 
-    AddAnimalEvent(Animal a, Object source) {
+    public AddAnimalEvent(Animal a, Object source) {
         super(source);
         this.a = a;
     }

@@ -15,16 +15,16 @@
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package gensim;
+package gensim.animals;
 
-import genes.BarredFeatherGene;
-import genes.BlackFeatherGene;
-import genes.BredaCombGene;
-import genes.ColumbianFeatherGene;
-import genes.CreeperLegGene;
-import genes.FrizzleFeatherGene;
-import genes.Gene;
-import genes.ShellColorGene;
+import gensim.genes.BarredFeatherGene;
+import gensim.genes.BlackFeatherGene;
+import gensim.genes.BredaCombGene;
+import gensim.genes.ColumbianFeatherGene;
+import gensim.genes.CreeperLegGene;
+import gensim.genes.FrizzleFeatherGene;
+import gensim.genes.Gene;
+import gensim.genes.ShellColorGene;
 import java.util.Random;
 
 /**

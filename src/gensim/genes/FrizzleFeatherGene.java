@@ -14,55 +14,55 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-package genes;
+package gensim.genes;
 
 /**
  *
  * @author Andrew Vitkus
  */
-public class ShellColorGene extends Gene {
+public class FrizzleFeatherGene extends Gene {
 
     String phenotype;
     String genotype;
 
     static {
         genotypes = new String[3];
-        genotypes[0] = "BB";
-        genotypes[1] = "Bb";
-        genotypes[2] = "bb";
+        genotypes[0] = "FF";
+        genotypes[1] = "Ff";
+        genotypes[2] = "ff";
 
         phenotypes = new String[3];
-        phenotypes[0] = "Blue";
-        phenotypes[1] = "Blue";
-        phenotypes[2] = "White";
+        phenotypes[0] = "Normal";
+        phenotypes[1] = "Frizzle";
+        phenotypes[2] = "Curly";
     }
 
-    public ShellColorGene(String genotype) {
+    public FrizzleFeatherGene(String genotype) {
         this.genotype = genotype;
         switch (genotype) {
-            case "BB":
-                phenotype = "Blue";
+            case "FF":
+                phenotype = "Normal";
                 break;
-            case "Bb":
-            case "bB":
-                phenotype = "Blue";
+            case "Ff":
+            case "fF":
+                phenotype = "Frizzle";
                 break;
-            case "bb":
-                phenotype = "White";
+            case "ff":
+                phenotype = "Curly";
                 break;
             default:
-            //System.err.println("Invalid genotype set for shell color!");
+            //System.err.println("Invalid genotype set for frizzle feather!");
         }
     }
 
     @Override
     public String getGeneName() {
-        return "Egg Color";
+        return "Frizzle Feather";
     }
 
     @Override
     public String getEffectedTrait() {
-        return "Egg Color";
+        return "Frizzle Feather";
     }
 
     @Override

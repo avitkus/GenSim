@@ -14,55 +14,55 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-package genes;
+package gensim.genes;
 
 /**
  *
  * @author Andrew Vitkus
  */
-public class BlackFeatherGene extends Gene {
+public class CreeperLegGene extends Gene {
 
     String phenotype;
     String genotype;
 
     static {
         genotypes = new String[3];
-        genotypes[0] = "EE";
-        genotypes[1] = "Ee";
-        genotypes[2] = "ee";
+        genotypes[0] = "CC";
+        genotypes[1] = "Cc";
+        genotypes[2] = "cc";
 
         phenotypes = new String[3];
-        phenotypes[0] = "Black";
-        phenotypes[1] = "Black";
-        phenotypes[2] = "Wheaten";
+        phenotypes[0] = "Dead";
+        phenotypes[1] = "Creeper";
+        phenotypes[2] = "Normal";
     }
 
-    public BlackFeatherGene(String genotype) {
+    public CreeperLegGene(String genotype) {
         this.genotype = genotype;
         switch (genotype) {
-            case "EE":
-                phenotype = "Black";
+            case "CC":
+                phenotype = "Dead";
                 break;
-            case "Ee":
-            case "eE":
-                phenotype = "Black";
+            case "Cc":
+            case "cC":
+                phenotype = "Creeper";
                 break;
-            case "ee":
-                phenotype = "Wheaten";
+            case "cc":
+                phenotype = "Normal";
                 break;
             default:
-            //System.err.println("Invalid genotype set for black feathers!");
+            //System.err.println("Invalid genotype set for creeper legs!");
         }
     }
 
     @Override
     public String getGeneName() {
-        return "Black Feathers";
+        return "Creeper Legs";
     }
 
     @Override
     public String getEffectedTrait() {
-        return "Black Feathers";
+        return "Creeper Legs";
     }
 
     @Override

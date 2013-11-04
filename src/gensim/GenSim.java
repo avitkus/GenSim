@@ -16,12 +16,16 @@
  */
 package gensim;
 
+import gensim.windows.MainWindow;
+
 /**
  *
  * @author Andrew Vitkus
  */
 public class GenSim {
-
+    public static final String VERSION_NUMBER = "1.5";
+    public static final String MINIMUM_SUPPORTED_VERSION = "1.5";
+    
     public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(new MainWindow());
     }

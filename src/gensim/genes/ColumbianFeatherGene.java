@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-package genes;
+package gensim.genes;
 
 /**
  *
  * @author Andrew Vitkus
  */
-public class CreeperLegGene extends Gene {
+public class ColumbianFeatherGene extends Gene {
 
     String phenotype;
     String genotype;
@@ -32,37 +32,37 @@ public class CreeperLegGene extends Gene {
         genotypes[2] = "cc";
 
         phenotypes = new String[3];
-        phenotypes[0] = "Dead";
-        phenotypes[1] = "Creeper";
-        phenotypes[2] = "Normal";
+        phenotypes[0] = "Columbian";
+        phenotypes[1] = "Columbian";
+        phenotypes[2] = "Wheaten";
     }
 
-    public CreeperLegGene(String genotype) {
+    public ColumbianFeatherGene(String genotype) {
         this.genotype = genotype;
         switch (genotype) {
             case "CC":
-                phenotype = "Dead";
+                phenotype = "Columbian";
                 break;
             case "Cc":
             case "cC":
-                phenotype = "Creeper";
+                phenotype = "Columbian";
                 break;
             case "cc":
-                phenotype = "Normal";
+                phenotype = "Wheaten";
                 break;
             default:
-            //System.err.println("Invalid genotype set for creeper legs!");
+            //System.err.println("Invalid genotype set for columbian feathers!");
         }
     }
 
     @Override
     public String getGeneName() {
-        return "Creeper Legs";
+        return "Columbian Feathers";
     }
 
     @Override
     public String getEffectedTrait() {
-        return "Creeper Legs";
+        return "Columbian Feathers";
     }
 
     @Override

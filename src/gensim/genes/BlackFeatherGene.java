@@ -14,55 +14,55 @@
  * You should have received a copy of the GNU General Public License
  * along with GenSim.  If not, see <http://www.gnu.org/licenses/>.
  */
-package genes;
+package gensim.genes;
 
 /**
  *
  * @author Andrew Vitkus
  */
-public class BredaCombGene extends Gene {
+public class BlackFeatherGene extends Gene {
 
     String phenotype;
     String genotype;
 
     static {
         genotypes = new String[3];
-        genotypes[0] = "BB";
-        genotypes[1] = "Bb";
-        genotypes[2] = "bb";
+        genotypes[0] = "EE";
+        genotypes[1] = "Ee";
+        genotypes[2] = "ee";
 
         phenotypes = new String[3];
-        phenotypes[0] = "Comb";
-        phenotypes[1] = "Comb";
-        phenotypes[2] = "Combless";
+        phenotypes[0] = "Black";
+        phenotypes[1] = "Black";
+        phenotypes[2] = "Wheaten";
     }
 
-    public BredaCombGene(String genotype) {
+    public BlackFeatherGene(String genotype) {
         this.genotype = genotype;
         switch (genotype) {
-            case "BB":
-                phenotype = "Comb";
+            case "EE":
+                phenotype = "Black";
                 break;
-            case "Bb":
-            case "bB":
-                phenotype = "Comb";
+            case "Ee":
+            case "eE":
+                phenotype = "Black";
                 break;
-            case "bb":
-                phenotype = "Combless";
+            case "ee":
+                phenotype = "Wheaten";
                 break;
             default:
-            //System.err.println("Invalid genotype set for Breda comb presence!");
+            //System.err.println("Invalid genotype set for black feathers!");
         }
     }
 
     @Override
     public String getGeneName() {
-        return "Bred Comb";
+        return "Black Feathers";
     }
 
     @Override
     public String getEffectedTrait() {
-        return "Breda Comb";
+        return "Black Feathers";
     }
 
     @Override
